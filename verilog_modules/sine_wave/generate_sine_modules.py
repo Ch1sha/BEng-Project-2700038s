@@ -7,7 +7,15 @@ import os
 # generate all modules in the same directory as this script
 PWD = os.path.dirname(os.path.abspath(__file__))
 
-def generateSineTable(bitResolution=8, deltaPhase=100) -> np.ndarray:
+def generateSineTable(bitResolution:int, deltaPhase:int) -> np.ndarray:
+    """
+    Generate a sine wave table with specified bit resolution and phase increment.
+
+    :param bitResolution: The bit resolution for the output values. Default is 8 bits.
+    :param deltaPhase: The phase increment for generating the sine wave. Default is 100.
+    :return: A numpy array containing the sine wave values scaled to fit the specified bit resolution.
+    """
+
     amplitude=1 # DONT CHANGE THIS, need unitary amplitude for the sine wave
     # Frequency for the sine wave (1 Hz in this case, assuming normalized sampling)
     f = 1
@@ -21,9 +29,20 @@ def generateSineTable(bitResolution=8, deltaPhase=100) -> np.ndarray:
     table = np.round((table + 1) * (max_val / 2)).astype(int)  # Shifted and scaled
     return table
 
-def construct_sine_table_module(table, bitResolution, filename='half_sine_table.v'):
+def construct_sine_table_module(sine_table: np.ndarray, bitResolution: int, filename='half_sine_table.v'):
+    """
+    Constructs a Verilog module for a sine wave table.
+
+    This function generates a Verilog module that represents a sine wave table.
+    The generated module includes an array of sine wave values and the size of the table.
+
+    :param sine_table: List of integer values representing the sine wave.
+    :param bitResolution: Integer representing the bit resolution of the sine wave values.
+    :param filename: String representing the name of the output Verilog file. Default is 'half_sine_table.v'.
+    """
+
     bitCount = bitResolution - 1
-    table_size = len(table)
+    table_size = len(sine_table)
     table_reg_size = math.ceil(math.log2(table_size))
     filepath = os.path.join(PWD, filename)
 
@@ -34,21 +53,23 @@ def construct_sine_table_module(table, bitResolution, filename='half_sine_table.
         file.write(');\n')
         file.write('    initial begin\n')
         file.write('        table_size = {table_size};\n'.format(table_size=table_size))
-        for i, value in enumerate(table):
+        for i, value in enumerate(sine_table):
             file.write('        sine_wave[{}] = {};\n'.format(i, value))
         file.write('    end\n')
         file.write('endmodule\n')
 
 # Function to update macros in the Verilog file
-def update_sine_wave_macros(table, bitResolution, filename = 'sine_wave.v'):
+def update_sine_wave_macros(sine_table: np.ndarray, bitResolution: int, filename = 'sine_wave.v'):
     """
     Update the macro definitions for the sine_wave.v module.
 
+    :param sine_table: List of integer values representing the sine wave.
     :param file_path: Path to the Verilog file to be updated.
     :param macros: Dictionary with macro names as keys and new values as values.
     """
+
     SINE_SIZE:int = bitResolution
-    TABLE_SIZE:int = len(table)
+    TABLE_SIZE:int = len(sine_table)
     TABLE_REG_SIZE:int = math.ceil(math.log2(TABLE_SIZE))
     file_path = os.path.join(PWD, filename)
 
@@ -75,6 +96,13 @@ def update_sine_wave_macros(table, bitResolution, filename = 'sine_wave.v'):
         file.write(updated_content)
 
 def plotSineWave(sine_table: np.ndarray):
+    """
+    Plots a sine wave using the provided sine table.
+
+    :param sine_table: A numpy array containing the sine wave values to be plotted.
+    :type sine_table: np.ndarray
+    """
+
     plt.plot(sine_table)
     plt.title('Sine Wave')
     plt.xlabel('Samples')
