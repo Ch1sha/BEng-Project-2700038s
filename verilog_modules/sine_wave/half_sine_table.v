@@ -1,9 +1,12 @@
 module half_sine_table(
-    output logic [11:0] sine_wave [0:71],
-    output logic [6:0] table_size
+`define SINE_SIZE 12
+`define TABLE_SIZE 72
+`define TABLE_REG_SIZE 7
+    output logic [`SINE_SIZE-1:0] sine_wave [0:`TABLE_SIZE-1],
+    output logic [`TABLE_REG_SIZE-1:0] table_size
 );
     initial begin
-        table_size = 72;
+        table_size = `TABLE_SIZE-1;
         sine_wave[0] = 0;
         sine_wave[1] = 2;
         sine_wave[2] = 8;
