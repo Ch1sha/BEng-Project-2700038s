@@ -1,13 +1,7 @@
+import argparse
+import os
 import math
 import numpy as np
-import matplotlib.pyplot as plt
-import re
-import os
-import argparse
-
-
-#TODO: Edit the script to take in an argument for the bit resolution of the sine wave
-
 
 # generate all modules in the verilog module root directory
 MODULE_ROOT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
@@ -28,7 +22,7 @@ def generateSineTable(bitResolution:int, deltaPhase:int) -> np.ndarray:
 
     # Generate the sine wave table with values in the range [0, 2*amplitude]
     table = amplitude * np.array([math.sin(angularFreq * i / deltaPhase) for i in range(int(-deltaPhase/4), int(deltaPhase/4))])
-    
+
     # Scale to fit unsigned bit resolution, centred around amplitude
     max_val = (2 ** bitResolution) - 1  # Maximum value for the unsigned range
     table = np.round((table + 1) * (max_val / 2)).astype(int)  # Shifted and scaled
@@ -65,14 +59,19 @@ def construct_sine_table_module(sine_table: np.ndarray, bitResolution: int, file
         file.write('endmodule\n')
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(description='Generate a sine wave table.')
     parser.add_argument('--bit_count', type=int, default=8, help='The bit resolution for the sine wave values.')
     args = parser.parse_args()
 
     bitResolution = args.bit_count
     deltaPhase = bitResolution**2 # Scale the deltaPhase to the bit resolution to get a smooth sine wave
-    print("Generating sine wave table with bit resolution {} and delta phase {}".format(bitResolution, deltaPhase))
-    sine_table = generateSineTable( bitResolution=bitResolution, deltaPhase=deltaPhase)
+
+    sine_table = generateSineTable(bitResolution=bitResolution, deltaPhase=deltaPhase)
+    print("Sine wave table generated with bit resolution = {}, delta phase = {}, and {} samples".format(bitResolution, deltaPhase, len(sine_table)))
+
     construct_sine_table_module(sine_table, bitResolution)
-    print("half_sine_table.v generated with {} samples".format(len(sine_table)))
+    print("half_sine_table.v generated with SINE_SIZE = {} and TABLE_SIZE = {}\n".format(bitResolution, len(sine_table)))
+
+if __name__ == '__main__':
+    main()

@@ -1,13 +1,10 @@
+import argparse
+import os
 import math
 import numpy as np
 import matplotlib.pyplot as plt
 import re
-import os
-import argparse
-from generate_half_sine_table import generateSineTable
-
-# generate all modules in the verilog module root directory
-MODULE_ROOT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+from generate_half_sine_table import generateSineTable, MODULE_ROOT_PATH
 
 # Function to update macros in the Verilog file
 def update_sine_wave_macros(sine_table: np.ndarray, bitResolution: int, filename = 'sine_wave.v'):
@@ -23,11 +20,11 @@ def update_sine_wave_macros(sine_table: np.ndarray, bitResolution: int, filename
     TABLE_SIZE:int = len(sine_table)
     TABLE_REG_SIZE:int = math.ceil(math.log2(TABLE_SIZE+1))
     file_path = os.path.join(MODULE_ROOT_PATH, filename)
-
     macros = {"SINE_SIZE": SINE_SIZE, "TABLE_SIZE": TABLE_SIZE, "TABLE_REG_SIZE": TABLE_REG_SIZE}
+
     with open(file_path, 'r') as file:
         content = file.read()
-    
+
     # Regex pattern to match Verilog macros (e.g., `define NAME VALUE)
     pattern = r"`define\s+(\w+)\s+(.+)"
     
@@ -61,6 +58,7 @@ def plotSineWave(sine_table: np.ndarray):
     plt.grid(True)
     plt.show()
 
+
 def main():
     parser = argparse.ArgumentParser(description='Generate a sine wave table.')
     parser.add_argument('--bit_count', type=int, default=8, help='The bit resolution for the sine wave values.')
@@ -69,12 +67,11 @@ def main():
     bitResolution = args.bit_count
     deltaPhase = bitResolution**2 # Scale the deltaPhase to the bit resolution to get a smooth sine wave
 
-    print("Generating sine wave table with bit resolution {} and delta phase {}".format(bitResolution, deltaPhase))
-    sine_table = generateSineTable( bitResolution=bitResolution, deltaPhase=deltaPhase)
-    print("Sine wave table generated with {} samples".format(len(sine_table)))
-    
-    print("Constructing sine_wave.v module")
+    sine_table = generateSineTable(bitResolution=bitResolution, deltaPhase=deltaPhase)
+    print("Sine wave table generated with bit resolution = {}, delta phase = {}, and {} samples".format(bitResolution, deltaPhase, len(sine_table)))
+
     update_sine_wave_macros(sine_table, bitResolution)
+    print("sine_wave.v updated with SINE_SIZE = {} and TABLE_SIZE = {}\n".format(bitResolution, len(sine_table)))
 
 if __name__ == '__main__':
     main()
