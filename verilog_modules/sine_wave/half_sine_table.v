@@ -1,83 +1,43 @@
 module half_sine_table(
-`define SINE_SIZE 12
-`define TABLE_SIZE 72
-`define TABLE_REG_SIZE 7
+`define SINE_SIZE 8
+`define TABLE_SIZE 32
+`define TABLE_REG_SIZE 6
     output logic [`SINE_SIZE-1:0] sine_wave [0:`TABLE_SIZE-1],
     output logic [`TABLE_REG_SIZE-1:0] table_size
 );
     initial begin
         table_size = `TABLE_SIZE-1;
         sine_wave[0] = 0;
-        sine_wave[1] = 2;
-        sine_wave[2] = 8;
-        sine_wave[3] = 18;
-        sine_wave[4] = 31;
-        sine_wave[5] = 49;
-        sine_wave[6] = 70;
-        sine_wave[7] = 95;
-        sine_wave[8] = 123;
-        sine_wave[9] = 156;
-        sine_wave[10] = 192;
-        sine_wave[11] = 231;
-        sine_wave[12] = 274;
-        sine_wave[13] = 321;
-        sine_wave[14] = 370;
-        sine_wave[15] = 423;
-        sine_wave[16] = 479;
-        sine_wave[17] = 538;
-        sine_wave[18] = 600;
-        sine_wave[19] = 664;
-        sine_wave[20] = 731;
-        sine_wave[21] = 801;
-        sine_wave[22] = 873;
-        sine_wave[23] = 947;
-        sine_wave[24] = 1024;
-        sine_wave[25] = 1102;
-        sine_wave[26] = 1182;
-        sine_wave[27] = 1264;
-        sine_wave[28] = 1347;
-        sine_wave[29] = 1432;
-        sine_wave[30] = 1518;
-        sine_wave[31] = 1604;
-        sine_wave[32] = 1692;
-        sine_wave[33] = 1780;
-        sine_wave[34] = 1869;
-        sine_wave[35] = 1958;
-        sine_wave[36] = 2048;
-        sine_wave[37] = 2137;
-        sine_wave[38] = 2226;
-        sine_wave[39] = 2315;
-        sine_wave[40] = 2403;
-        sine_wave[41] = 2491;
-        sine_wave[42] = 2577;
-        sine_wave[43] = 2663;
-        sine_wave[44] = 2748;
-        sine_wave[45] = 2831;
-        sine_wave[46] = 2913;
-        sine_wave[47] = 2993;
-        sine_wave[48] = 3071;
-        sine_wave[49] = 3148;
-        sine_wave[50] = 3222;
-        sine_wave[51] = 3294;
-        sine_wave[52] = 3364;
-        sine_wave[53] = 3431;
-        sine_wave[54] = 3495;
-        sine_wave[55] = 3557;
-        sine_wave[56] = 3616;
-        sine_wave[57] = 3672;
-        sine_wave[58] = 3725;
-        sine_wave[59] = 3774;
-        sine_wave[60] = 3821;
-        sine_wave[61] = 3864;
-        sine_wave[62] = 3903;
-        sine_wave[63] = 3939;
-        sine_wave[64] = 3972;
-        sine_wave[65] = 4000;
-        sine_wave[66] = 4025;
-        sine_wave[67] = 4046;
-        sine_wave[68] = 4064;
-        sine_wave[69] = 4077;
-        sine_wave[70] = 4087;
-        sine_wave[71] = 4093;
+        sine_wave[1] = 1;
+        sine_wave[2] = 2;
+        sine_wave[3] = 5;
+        sine_wave[4] = 10;
+        sine_wave[5] = 15;
+        sine_wave[6] = 21;
+        sine_wave[7] = 29;
+        sine_wave[8] = 37;
+        sine_wave[9] = 47;
+        sine_wave[10] = 57;
+        sine_wave[11] = 67;
+        sine_wave[12] = 79;
+        sine_wave[13] = 90;
+        sine_wave[14] = 103;
+        sine_wave[15] = 115;
+        sine_wave[16] = 128;
+        sine_wave[17] = 140;
+        sine_wave[18] = 152;
+        sine_wave[19] = 165;
+        sine_wave[20] = 176;
+        sine_wave[21] = 188;
+        sine_wave[22] = 198;
+        sine_wave[23] = 208;
+        sine_wave[24] = 218;
+        sine_wave[25] = 226;
+        sine_wave[26] = 234;
+        sine_wave[27] = 240;
+        sine_wave[28] = 245;
+        sine_wave[29] = 250;
+        sine_wave[30] = 253;
+        sine_wave[31] = 254;
     end
 endmodule

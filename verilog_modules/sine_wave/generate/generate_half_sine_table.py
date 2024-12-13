@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import re
 import os
+import argparse
+
 
 #TODO: Edit the script to take in an argument for the bit resolution of the sine wave
 
@@ -64,7 +66,11 @@ def construct_sine_table_module(sine_table: np.ndarray, bitResolution: int, file
 
 
 if __name__ == '__main__':
-    bitResolution = 12
+    parser = argparse.ArgumentParser(description='Generate a sine wave table.')
+    parser.add_argument('--bit_count', type=int, default=8, help='The bit resolution for the sine wave values.')
+    args = parser.parse_args()
+
+    bitResolution = args.bit_count
     deltaPhase = bitResolution**2 # Scale the deltaPhase to the bit resolution to get a smooth sine wave
     print("Generating sine wave table with bit resolution {} and delta phase {}".format(bitResolution, deltaPhase))
     sine_table = generateSineTable( bitResolution=bitResolution, deltaPhase=deltaPhase)

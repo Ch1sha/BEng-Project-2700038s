@@ -1,7 +1,7 @@
 /* verilator lint_off WIDTHEXPAND */
-`define SINE_SIZE 12
-`define TABLE_SIZE 72
-`define TABLE_REG_SIZE 7
+`define SINE_SIZE 8
+`define TABLE_SIZE 32
+`define TABLE_REG_SIZE 6
 `define PHASE_SIZE `TABLE_REG_SIZE // resolution for phase input
 
 module sine_wave (
