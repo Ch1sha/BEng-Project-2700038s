@@ -25,10 +25,15 @@ PHASE=0
 # Flags to check if arguments are provided
 SIM_TIME_PROVIDED=false
 PHASE_PROVIDED=false
+PLOT=false
 
 # Parse optional arguments
 while [[ "$#" -gt 0 ]]; do
     case $1 in
+        --plot)
+            PLOT=true
+            shift
+            ;;
         --sim_time)
             if [[ -n "$2" ]]; then
                 SIM_TIME=$2
@@ -74,7 +79,7 @@ ${MODULE_DIR}/simulate/obj_dir/V${verilog_module_filename} --sim_time ${SIM_TIME
 echo "Simulation of the ${verilog_module_filename}.v module is complete"
 
 # Check for the --no-plot argument
-if [[ "$1" != "--no-plot" ]]; then
+if $PLOT; then
     echo "Plotting the output of the simulation..."
     python ${MODULE_DIR}/simulate/plot_sine_wave.py
 else
