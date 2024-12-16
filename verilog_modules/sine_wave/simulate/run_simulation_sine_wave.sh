@@ -1,4 +1,4 @@
-# !/bin/bash
+#!/bin/bash
 set -e
 
 # Determine the verilog module's root directory, allowing the script to be run from any location
@@ -19,22 +19,57 @@ if [ -f "$output_csv" ]; then
     rm "$output_csv"
 fi
 
-# Check for an optional sim_time argument
+# Default values
 SIM_TIME=250
-if [[ "$1" == "--sim_time" ]]; then
-    if [[ -n "$2" ]]; then
-        SIM_TIME=$2
-        shift 2
-    else
-        echo "Error: --bit_count requires a value"
-        exit 1
-    fi
+PHASE=0
+# Flags to check if arguments are provided
+SIM_TIME_PROVIDED=false
+PHASE_PROVIDED=false
+
+# Parse optional arguments
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --sim_time)
+            if [[ -n "$2" ]]; then
+                SIM_TIME=$2
+                SIM_TIME_PROVIDED=true
+                shift 2
+            else
+                echo "Error: --sim_time requires a value"
+                exit 1
+            fi
+            ;;
+        --phase)
+            if [[ -n "$2" ]]; then
+                PHASE=$2
+                PHASE_PROVIDED=true
+                shift 2
+            else
+                echo "Error: --phase requires a value"
+                exit 1
+            fi
+            ;;
+        *)
+            echo "Unknown parameter passed: $1"
+            exit 1
+            ;;
+    esac
+done
+
+echo "" # newline
+if $SIM_TIME_PROVIDED; then
+    echo "Simulation time set to ${SIM_TIME} cycles"
 else
-    echo "No sim_time argument provided. Using default value of ${SIM_TIME}."
+    echo "No simulation time argument provided. Using default value of ${SIM_TIME} cycles."
+fi
+if $PHASE_PROVIDED; then
+    echo "Phase set to ${PHASE} cycles"
+else
+    echo "No phase argument provided. Using default value of ${PHASE} cycles."
 fi
 
-# run the simulation, and save the output to a csv file
-${MODULE_DIR}/simulate/obj_dir/V${verilog_module_filename} --sim_time ${SIM_TIME}  >> ${output_csv}
+# Run the simulation, and save the output to a csv file
+${MODULE_DIR}/simulate/obj_dir/V${verilog_module_filename} --sim_time ${SIM_TIME} --phase ${PHASE} >> ${output_csv}
 
 echo "Simulation of the ${verilog_module_filename}.v module is complete"
 
