@@ -6,6 +6,17 @@ int main(int argc, char** argv) {
     // Initialize Verilator context
     VerilatedContext* contextp = new VerilatedContext;
     contextp->commandArgs(argc, argv);
+    int sim_time;
+    for (int i = 1; i < argc; i++) {
+        if (std::string(argv[i]) == "--sim_time" && i + 1 < argc) {
+            //printf("Setting simulation time to %d\n", std::atoi(argv[i + 1]));
+            sim_time = std::atoi(argv[i + 1]); // Convert the argument to an integer
+            if (sim_time <= 0) {
+                std::cerr << "Error: Invalid --sim_time value. Must be greater than 0." << std::endl;
+                return 1;
+            }
+        }
+    }
 
     // Instantiate the model
     Vsine_wave* top = new Vsine_wave{contextp};
@@ -18,7 +29,7 @@ int main(int argc, char** argv) {
     // Reset logic for 5 cycles
     for (int i = 0; i < 10; i++) {
         top->clock = !top->clock;
-        top->eval(); // Evaluate model
+        top->eval(); // Evaluate model on each clock edge
         if (contextp->time() > 5) { // Deactivate reset after 5 time units
             top->reset = 0;
         }
@@ -27,7 +38,7 @@ int main(int argc, char** argv) {
 
     // Main simulation loop
     int cycleCount = 0;
-    for (int i = 0; i < 400; i++) { // Adjust if you need more/less cycles
+    for (int i = 0; i < sim_time; i++) {
         top->clock = !top->clock; // Toggle clock
 
         // Evaluate model on both edges
@@ -39,8 +50,8 @@ int main(int argc, char** argv) {
             cycleCount++;
         }
 
-        // Advance simulation time
-        contextp->timeInc(1); // Increment time by 1 time unit
+        // Increment time by 1 time unit
+        contextp->timeInc(1);
     }
 
     // Final model cleanup

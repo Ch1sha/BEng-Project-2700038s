@@ -1,7 +1,8 @@
-module half_sine_table(
 `define SINE_SIZE 8
 `define TABLE_SIZE 32
 `define TABLE_REG_SIZE 6
+
+module half_sine_table(
     output logic [`SINE_SIZE-1:0] sine_wave [0:`TABLE_SIZE-1],
     output logic [`TABLE_REG_SIZE-1:0] table_size
 );

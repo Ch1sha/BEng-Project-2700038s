@@ -46,8 +46,8 @@ def construct_sine_table_module(sine_table: np.ndarray, bitResolution: int, file
     filepath = os.path.join(MODULE_ROOT_PATH, filename)
 
     with open(filepath, 'w') as file:
+        file.write('`define SINE_SIZE {}\n`define TABLE_SIZE {}\n`define TABLE_REG_SIZE {}\n\n'.format(SINE_SIZE, TABLE_SIZE, TABLE_REG_SIZE))
         file.write('module half_sine_table(\n')
-        file.write('`define SINE_SIZE {}\n`define TABLE_SIZE {}\n`define TABLE_REG_SIZE {}\n'.format(SINE_SIZE, TABLE_SIZE, TABLE_REG_SIZE))
         file.write('    output logic [`SINE_SIZE-1:0] sine_wave [0:`TABLE_SIZE-1],\n')
         file.write('    output logic [`TABLE_REG_SIZE-1:0] table_size\n')
         file.write(');\n')

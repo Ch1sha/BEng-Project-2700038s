@@ -66,22 +66,17 @@ module sine_wave (
             sine <= sine_wave_table[i];
 
             // Update index based on traversal direction
-            if (!reverseTraversal) begin
-                // Forward traversal
+            if (!reverseTraversal) begin // Forward traversal
                 if (i == tableSize - 1) begin
                     reverseTraversal <= 1; // Switch to reverse traversal at the end
-                    i <= i - 1;
-                end else begin
-                    i <= i + 1; // Continue moving forward
-                end
-            end else begin
-                // Reverse traversal
+                end 
+                i <= i + 1; // Continue moving forward
+
+            end else begin // Reverse traversal
                 if (i == 1) begin
                     reverseTraversal <= 0; // Switch to forward traversal at the start
-                    i <= i + 1;
-                end else begin
-                    i <= i - 1; // Continue moving back
                 end
+                i <= i - 1; // Continue moving back
             end
         end
     end

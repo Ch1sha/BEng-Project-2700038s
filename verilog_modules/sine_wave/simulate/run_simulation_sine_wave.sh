@@ -19,12 +19,24 @@ if [ -f "$output_csv" ]; then
     rm "$output_csv"
 fi
 
+# Check for an optional sim_time argument
+SIM_TIME=250
+if [[ "$1" == "--sim_time" ]]; then
+    if [[ -n "$2" ]]; then
+        SIM_TIME=$2
+        shift 2
+    else
+        echo "Error: --bit_count requires a value"
+        exit 1
+    fi
+else
+    echo "No sim_time argument provided. Using default value of ${SIM_TIME}."
+fi
+
 # run the simulation, and save the output to a csv file
-${MODULE_DIR}/simulate/obj_dir/V${verilog_module_filename} >> ${output_csv}
+${MODULE_DIR}/simulate/obj_dir/V${verilog_module_filename} --sim_time ${SIM_TIME}  >> ${output_csv}
 
 echo "Simulation of the ${verilog_module_filename}.v module is complete"
-
-echo "Plotting the output of the simulation..."
 
 # Check for the --no-plot argument
 if [[ "$1" != "--no-plot" ]]; then
