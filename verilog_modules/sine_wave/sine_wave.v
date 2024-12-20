@@ -29,23 +29,17 @@ module sine_wave (
 
     // Function to calculate the starting index based on phase
     function integer calculate_start_index(input integer phaseVal);
-
-        real phaseRad;
-        real scaled_phase;
+        integer midpoint;
         integer start_index;
         begin
-            // Convert phase (degrees) to radians
-            phaseRad = phaseVal * `M_PI / 180.0;
+            midpoint = ((`TABLE_SIZE) / 2); // Exact midpoint index of the sine table
 
-            // Scale phase from -π to π into the table size range [0, TABLE_SIZE-1]
-            scaled_phase = (phaseRad + `M_PI) * (`TABLE_SIZE) / (2.0 * `M_PI);
-
-            // Truncate the scaled phase and wrap it using modulo operation
-            start_index = $rtoi(scaled_phase) % (`TABLE_SIZE);
+            // Offset from midpoint
+            start_index = midpoint + phaseVal;
 
             // Ensure the index is positive
             if (start_index < 0) begin
-                start_index = start_index + `TABLE_SIZE;
+                start_index = -start_index;
             end
 
             calculate_start_index = start_index;
@@ -57,15 +51,18 @@ module sine_wave (
             tableSize <= logic_table_size; // Assign constant table size on reset
             prev_phase <= phase; // Update previous phase
 
-            // Set initial traversal direction based on phase sign
-            if (phase >= 0) begin
-                reverseTraversal <= 0; // Start with forward traversal
-            end else begin
-                reverseTraversal <= 1; // Start with reverse traversal
-            end
-
             // Set initial index based on phase offset
             i <= calculate_start_index(phase);
+
+            // Set initial traversal direction based on phase sign
+            if (phase >= 0) begin
+                // Handle edge case where phase is 180º
+                reverseTraversal <= (i < `TABLE_SIZE - 1) ? 0 : 1; // Start with forward traversal if i < TABLE_SIZE - 1, else reverse
+            end else begin
+                // Handle edge case where phase is -180º
+                reverseTraversal <= (i > 0) ? 1 : 0; // Start with reverse traversal if i > 0, else forward
+            end
+
             sine <= sine_wave_table[i]; // Initial output
         end else begin
             // Output current sine wave sample

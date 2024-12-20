@@ -30,18 +30,24 @@ int main(int argc, char** argv) {
 
     // Set initial input values
     top->clock = 0;
-    top->reset = 1;
+    top->reset = 0;
     top->phase = phase;
 
     // Reset logic for 5 cycles
+    int reset_cycles = -5;
     for (int i = 0; i < 10; i++) {
         top->clock = !top->clock;
         top->eval(); // Evaluate model on each clock edge
-        if (contextp->time() > 5) { // Deactivate reset after 5 time units
-            top->reset = 0;
+
+        if (top->clock) {
+            std::cout << "" << reset_cycles << "," << static_cast<int>(top->sine) << std::endl;
+            reset_cycles++;
         }
+
+        top->reset = 1;
         contextp->timeInc(1); // Increment time by 1 time unit
     }
+    top->reset = 0;
 
     // Main simulation loop
     int cycleCount = 0;
