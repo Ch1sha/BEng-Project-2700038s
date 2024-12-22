@@ -4,10 +4,13 @@ import os
 
 # Read the CSV file
 csv_file = os.path.join(os.path.dirname(__file__),'sine_wave_output.csv')
-data = pd.read_csv(csv_file, header=None, names=['x', 'y'])
 
-x = data['x']
-y = data['y']
+data = pd.read_csv(csv_file) 
+
+x = data['c']
+y = data['s']
+z = data['p']
+t = data['i']
 
 # Plot the sine wave
 plt.plot(x, y)

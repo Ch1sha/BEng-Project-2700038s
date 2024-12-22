@@ -33,6 +33,9 @@ int main(int argc, char** argv) {
     top->reset = 0;
     top->phase = phase;
 
+    // Print csv headers
+    std::cout << "c,s,p,i" << std::endl;
+
     // Reset logic for 5 cycles
     int reset_cycles = -5;
     for (int i = 0; i < 10; i++) {
@@ -40,7 +43,7 @@ int main(int argc, char** argv) {
         top->eval(); // Evaluate model on each clock edge
 
         if (top->clock) {
-            std::cout << "" << reset_cycles << "," << static_cast<int>(top->sine) << std::endl;
+            std::cout << "" << reset_cycles << "," << static_cast<int>(top->sine) << "," << static_cast<int>(top->phaseIdxOut) << "," << static_cast<int>(top->i) << std::endl;
             reset_cycles++;
         }
 
@@ -59,7 +62,7 @@ int main(int argc, char** argv) {
 
         // Capture output on the positive edge of clock
         if (top->clock) {
-            std::cout << "" << cycleCount << "," << static_cast<int>(top->sine) << std::endl;
+            std::cout << "" << cycleCount << "," << static_cast<int>(top->sine) << "," << static_cast<int>(top->phaseIdxOut) << "," << static_cast<int>(top->i) << std::endl;
             cycleCount++;
         }
 
