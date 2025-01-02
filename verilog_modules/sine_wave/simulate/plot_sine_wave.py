@@ -13,7 +13,7 @@ z = data['p']
 t = data['i']
 
 # Plot the sine wave
-plt.plot(x, y)
+plt.step(x, y)
 plt.title('Sine Wave')
 plt.xlabel('sample')
 plt.ylabel('sine wave')

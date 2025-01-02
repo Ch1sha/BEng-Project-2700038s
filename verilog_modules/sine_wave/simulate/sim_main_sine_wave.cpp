@@ -57,6 +57,11 @@ int main(int argc, char** argv) {
     for (int i = 0; i < sim_time; i++) {
         top->clock = !top->clock; // Toggle clock
 
+        // Set phase to 0 after 80 cycles
+        if (cycleCount == 80){
+            top->phase = 0;
+        }
+
         // Evaluate model on both edges
         top->eval();
 

@@ -5,7 +5,6 @@
 `define TABLE_SIZE 32
 `define TABLE_REG_SIZE 6
 `define PHASE_SIZE 8 // resolution for phase input (from -180º to 180º)
-`define M_PI (22/7)
 
 module sine_wave (
     input logic clock, 
