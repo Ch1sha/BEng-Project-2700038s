@@ -25,10 +25,6 @@ fi
 echo "Generating sine wave modules with ${BITCOUNT} bits"
 echo "==============================================="
 
-# Run the python script to generate the half_sine_table.v module
-echo "==Running generate_half_sine_table.py=="
-python ${MODULE_DIR}/generate/generate_half_sine_table.py --bit_count ${BITCOUNT}
-
-# Run the python script to generate the sine_wave.v module
-echo "==Running generate_sine_wave.py=="
-python ${MODULE_DIR}/generate/generate_sine_wave.py --bit_count ${BITCOUNT}
+# Run the python script to generate the half_sine_table.v module and update the sine_table.v macros
+echo "==Running generate_modules_sine.py=="
+python ${MODULE_DIR}/generate/generate_modules_sine.py --bit_count ${BITCOUNT}
