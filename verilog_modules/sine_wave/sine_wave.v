@@ -9,13 +9,14 @@
 module sine_wave (
     input logic clock, 
     input logic reset,
-    input logic signed [`PHASE_SIZE:0] phase, // phase input determines the starting point of the sine wave, no -1 to handle signed values
-    output logic [`SINE_SIZE-1:0] sine, // n-bit Sine wave output
+    input logic signed [`PHASE_SIZE:0] phase,     // phase input determines the starting point of the sine wave, no -1 to handle signed values
+    input logic signed [`PHASE_SIZE:0] phaseStep, // phase step input to control the phase increment
+    output logic [`SINE_SIZE-1:0] sine,           // n-bit Sine wave output
     output integer phaseIdxOut,
     output integer i
 );
 
-    logic [`SINE_SIZE-1:0] sine_wave_table [0:`TABLE_SIZE-1]; // 50 samples of sine wave
+    logic [`SINE_SIZE-1:0] sine_wave_table [0:`TABLE_SIZE-1];
     logic [`TABLE_REG_SIZE-1:0] logic_table_size;
     half_sine_table sine_table_inst (
         .sine_wave(sine_wave_table),
@@ -34,7 +35,7 @@ module sine_wave (
         integer midpoint;
         integer start_index;
         begin
-            midpoint = (`TABLE_SIZE / 2); // Exact midpoint index of the sine table
+            midpoint = (`TABLE_SIZE / 2);    // Exact midpoint index of the sine table
 
             // Offset from midpoint
             start_index = midpoint + phaseIndex;
@@ -77,8 +78,8 @@ module sine_wave (
 
     always_ff @(posedge clock or posedge reset) begin
         if (reset || phase != prev_phase) begin
-            tableSize <= logic_table_size; // Assign constant table size on reset
-            prev_phase <= phase; // Update previous phase
+            tableSize <= logic_table_size;   // Assign constant table size on reset
+            prev_phase <= phase;             // Update previous phase
 
             // Convert input phase into table index
             phaseIdx = phase_to_phaseVal(phase);
@@ -119,23 +120,30 @@ module sine_wave (
                 endcase
             end
 
-            sine <= sine_wave_table[i]; // Initial output
+            sine <= sine_wave_table[i];      // Initial output
 
         end else begin
             // Output current sine wave sample
             sine <= sine_wave_table[i];
 
             // Update index based on traversal direction
-            if (!reverseTraversal) begin // Forward traversal
-                if (i == tableSize - 1) begin
-                    reverseTraversal <= 1; // Switch to reverse traversal at the end
-                end 
-                i <= i + 1; // Continue moving forward
-            end else begin // Reverse traversal
-                if (i == 1) begin
-                    reverseTraversal <= 0; // Switch to forward traversal at the start
+            if (!reverseTraversal) begin     // Forward traversal
+                if (i >= tableSize - phaseStep) begin
+                    reverseTraversal <= 1;   // Switch to reverse traversal at the end
                 end
-                i <= i - 1; // Continue moving back
+
+                if (i + phaseStep <= tableSize) begin
+                    i <= i + phaseStep;      // Only increment if within bounds
+                end
+
+            end else begin                   // Reverse traversal
+                if (i <= phaseStep) begin
+                    reverseTraversal <= 0;   // Switch to forward traversal at the start
+                end
+
+                if (i - phaseStep >= 0) begin
+                    i <= (i - phaseStep);    // Only decrement if within bounds
+                end
             end
         end
     end
