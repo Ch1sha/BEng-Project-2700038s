@@ -9,18 +9,47 @@ MODULE_DIR=$(dirname "$0")/..
 # Set the default bit count
 BITCOUNT=8
 
-# Check for an optional bit_count argument
-if [[ "$1" == "--bit_count" ]]; then
-    if [[ -n "$2" ]]; then
-        BITCOUNT=$2
-        shift 2
-    else
-        echo "Error: --bit_count requires a value"
-        exit 1
-    fi
-else
-    echo "No bitcount argument provided. Using default value of ${BITCOUNT}."
-fi
+# Parse optional arguments
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --bit_count)
+            if [[ -n "$2" ]]; then
+
+            else
+                echo "Error: --override_sample requires a value"
+                exit 1
+            fi
+            ;;
+        --override_sample)
+            if [[ -n "$2" ]]; then
+
+            else
+                echo "Error: --override_sample requires a value"
+                exit 1
+            fi
+            ;;
+        --find_sample)
+            if [[ -n "$2" ]]; then
+
+            else
+                echo "Error: --find_sample requires a value"
+                exit 1
+            fi
+            ;;
+        --plot_sample)
+            PLOT=true
+            shift
+            ;;
+        --plot_sine)
+            PLOT=true
+            shift
+            ;;
+        *)
+            echo "Unknown parameter passed: $1"
+            exit 1
+            ;;
+    esac
+done
 
 echo "Generating sine wave modules with ${BITCOUNT} bits"
 echo "==============================================="
