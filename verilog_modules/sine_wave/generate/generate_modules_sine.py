@@ -65,13 +65,13 @@ def construct_sine_table_module(sine_table: np.ndarray, bitResolution: int, file
         file.write('    end\n')
         file.write('endmodule\n')
 
-def optimise_sampleCount(bitCount, min_sample_val=None, max_sample_val=None, n_calls=100, n_initial_points=100, random_state=42):
+def optimise_sampleCount(bitCount, min_sample_val=None, max_sample_val=None, random_state=42, n_calls=100, n_initial_points=100):
     """
     Perform Bayesian optimisation to find the optimal sampleCount for a given bitcount.
     
     Parameters:
         n (int): Number of bits for amplitude resolution.
-        m_min (int): Minimum value for `m` (default: 2^n).
+        m_min (int): Minimum value for `m` (default: 2n).
         m_max (int): Maximum value for `m` (default: 4 * 2^n).
         n_calls (int): Number of optimisation calls (default: 50).
         n_initial_points (int): Number of initial points for the optimisation (default: 10).
@@ -82,7 +82,7 @@ def optimise_sampleCount(bitCount, min_sample_val=None, max_sample_val=None, n_c
     """
     # Default range for sampleCount
     if min_sample_val is None:
-        min_sample_val = 2*bitCount**2
+        min_sample_val = bitCount*2
     if max_sample_val is None:
         max_sample_val = 4 * 2**bitCount
 
@@ -104,7 +104,7 @@ def optimise_sampleCount(bitCount, min_sample_val=None, max_sample_val=None, n_c
             penalty = 1000  # Large penalty to ensure this condition is prioritised
         return repeated_values - (alpha * sampleCount) + penalty
 
-    # Define the optimisation function to wrap the loss function
+    # Define the objective function to wrap the loss function
     @use_named_args(search_space)
     def objective(**params):
         sampleCount = params["sampleCount"]
@@ -116,7 +116,7 @@ def optimise_sampleCount(bitCount, min_sample_val=None, max_sample_val=None, n_c
         dimensions=search_space,
         n_calls=n_calls,
         n_initial_points=n_initial_points,
-        random_state=random_state, # For reproducibility
+        random_state=random_state, # Same seed for reproducibility
         verbose=False,
     )
 
@@ -132,6 +132,7 @@ def optimise_sampleCount(bitCount, min_sample_val=None, max_sample_val=None, n_c
 
 
 # ============ sine_wave.v generation ============
+
 def update_sine_wave_macros(sine_table: np.ndarray, bitResolution: int, filename = 'sine_wave.v'):
     """
     Update the macro definitions for the sine_wave.v module.
@@ -186,16 +187,21 @@ def plotSineWave(sine_table: np.ndarray):
 def main():
     parser = argparse.ArgumentParser(description='Generate a sine wave table.')
     parser.add_argument('--bit_count', type=int, default=8, help='The bit resolution for the sine wave values.')
+    parser.add_argument('--override_sample', type=int, default=None, help='Override the sample count for the sine wave table.')
+    parser.add_argument('--plot', action='store_true', help='Plot the ideal sample count data.')
+    parser.add_argument('--plot_sine', action='store_true', help='Plot the generated sine wave.')
     args = parser.parse_args()
 
     bitResolution = args.bit_count
-    optimisation_results = optimise_sampleCount(bitResolution)
-    sampleCount = optimisation_results["optimal_sampleCount"]
-    deltaPhase = 360 / sampleCount
+    override_sampleCount = args.override_sample
 
-    # global variable to store the optimised sample count, to be used by generate_sine_wave.py
-    global OPTIMISED_SAMPLE_COUNT
-    OPTIMISED_SAMPLE_COUNT = sampleCount
+    # determine the optimal sample count or use the override value
+    if override_sampleCount:
+        sampleCount = override_sampleCount
+    else:
+        optimisation_results = optimise_sampleCount(bitResolution)
+        sampleCount = optimisation_results["optimal_sampleCount"]
+    deltaPhase = 360 / sampleCount
 
     sine_table = generateSineTable(bitResolution=bitResolution, sampleCount=sampleCount)
     print("\nSine wave table generated with bit resolution = {}, delta phase = {}, and {} samples".format(bitResolution, deltaPhase, len(sine_table)))
@@ -206,14 +212,35 @@ def main():
     update_sine_wave_macros(sine_table, bitResolution)
     print("sine_wave.v updated with SINE_SIZE = {} and TABLE_SIZE = {}\n".format(bitResolution, len(sine_table)))
 
+    if args.plot:
+        bitsToCycle, idealSamples, params, x_smooth, y_smooth = find_ideal_sampleCount_data()
+        plot_ideal_sampleCount(bitsToCycle, idealSamples, params, x_smooth, y_smooth)
 
-def plot_ideal_sampleCount_data(maxBits=16):
+
+def find_ideal_sampleCount_data(maxBits=16):
+    """
+    Plot the ideal sample count data for a range of bit resolutions and fits the data to an exponential curve.
+    This function calculates the optimal sample count for bit resolutions ranging from `minBits` to `maxBits` using 
+    multithreading to speed up the computation. It then fits the calculated data to an exponential curve and plots 
+    both the original data points and the fitted curve.
+   
+     Parameters:
+    maxBits (int): The maximum bit resolution to consider. The default value is 16.
+    Returns:
+    None: It displays a plot of the data and the fitted curve.
+    """
     minBits = 2
 
     def optimise_sampleCount_wrapper(bits):
+        """
+        Wrapper function to calculate the optimal sample count for a given bit resolution.
+        """
         return bits, optimise_sampleCount(bits)["optimal_sampleCount"]
     
     def thread_done_callback(future):
+        """
+        Callback function to print the result of a threadn when it is done.
+        """
         bits, optimal_sampleCount = future.result()
         print(f"Thread done for bits: {bits}, optimal_sampleCount: {optimal_sampleCount}")
 
@@ -229,26 +256,27 @@ def plot_ideal_sampleCount_data(maxBits=16):
     # Collect the results
     results = [future.result() for future in futures]
 
-
     # Populate the dictionary with the results
     bit_idealSample_dict = {bits: optimal_sampleCount for bits, optimal_sampleCount in results}
     print(bit_idealSample_dict)
     idealSamples = list(bit_idealSample_dict.values())
 
     # === Now try to fit the data to a curve
-    # Define the exponential function
-    exponential = lambda x, a, b, c : a * np.exp(b * x) + c
+    curve = lambda x, a, b, c : a * np.exp(b * x) + c
     #fit the data to the exponential curve
-    params, covariance = curve_fit(exponential, bitsToCycle, idealSamples)
+    params, covariance = curve_fit(curve, bitsToCycle, idealSamples)
     a, b, c = params
-    print(f"Exponential fit: a={a}, b={b}, c={c}")
+    print(f"Exponential fit (ae^(bx) +c): a={a}, b={b}, c={c}")
     # Generate smooth x values for plotting the fitted curve
     x_smooth = np.linspace(min(bitsToCycle), max(bitsToCycle), 500)
-    y_smooth = exponential(x_smooth, a, b, c)
+    y_smooth = curve(x_smooth, a, b, c)
+    return bitsToCycle, idealSamples, params, x_smooth, y_smooth
     
+def plot_ideal_sampleCount(bitsToCycle, idealSamples, params, x_smooth, y_smooth):
     # Plot the original data points
     plt.scatter(bitsToCycle, idealSamples, label="Data Points", color="blue", zorder=5)
 
+    a, b, c = params
     # Plot the fitted exponential curve
     plt.plot(x_smooth, y_smooth, label=f"Fitted Curve: $y = {a:.2f}e^{{{b:.2f}x}} + {c:.2f}$", color="red", linewidth=2)
 
@@ -261,4 +289,4 @@ def plot_ideal_sampleCount_data(maxBits=16):
     plt.show()
 
 if __name__ == '__main__':
-    main()
+    find_ideal_sampleCount_data()
