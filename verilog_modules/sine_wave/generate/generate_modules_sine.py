@@ -131,7 +131,7 @@ def optimise_sampleCount(bitCount, min_sample_val=None, max_sample_val=None, ran
     }
 
 
-# ============ sine_wave.v generation ============
+# ============ sine_wave.v generation ============ #
 
 def update_sine_wave_macros(sine_table: np.ndarray, bitResolution: int, filename = 'sine_wave.v'):
     """
@@ -184,38 +184,7 @@ def plotSineWave(sine_table: np.ndarray):
     plt.grid(True)
     plt.show()
 
-def main():
-    parser = argparse.ArgumentParser(description='Generate a sine wave table.')
-    parser.add_argument('--bit_count', type=int, default=8, help='The bit resolution for the sine wave values.')
-    parser.add_argument('--override_sample', type=int, default=None, help='Override the sample count for the sine wave table.')
-    parser.add_argument('--plot', action='store_true', help='Plot the ideal sample count data.')
-    parser.add_argument('--plot_sine', action='store_true', help='Plot the generated sine wave.')
-    args = parser.parse_args()
-
-    bitResolution = args.bit_count
-    override_sampleCount = args.override_sample
-
-    # determine the optimal sample count or use the override value
-    if override_sampleCount:
-        sampleCount = override_sampleCount
-    else:
-        optimisation_results = optimise_sampleCount(bitResolution)
-        sampleCount = optimisation_results["optimal_sampleCount"]
-    deltaPhase = 360 / sampleCount
-
-    sine_table = generateSineTable(bitResolution=bitResolution, sampleCount=sampleCount)
-    print("\nSine wave table generated with bit resolution = {}, delta phase = {}, and {} samples".format(bitResolution, deltaPhase, len(sine_table)))
-
-    construct_sine_table_module(sine_table, bitResolution)
-    print("half_sine_table.v generated with SINE_SIZE = {} and TABLE_SIZE = {}".format(bitResolution, len(sine_table)))
-
-    update_sine_wave_macros(sine_table, bitResolution)
-    print("sine_wave.v updated with SINE_SIZE = {} and TABLE_SIZE = {}\n".format(bitResolution, len(sine_table)))
-
-    if args.plot:
-        bitsToCycle, idealSamples, params, x_smooth, y_smooth = find_ideal_sampleCount_data()
-        plot_ideal_sampleCount(bitsToCycle, idealSamples, params, x_smooth, y_smooth)
-
+# ============ Ideal sampleCount ============ #
 
 def find_ideal_sampleCount_data(maxBits=16):
     """
@@ -288,5 +257,40 @@ def plot_ideal_sampleCount(bitsToCycle, idealSamples, params, x_smooth, y_smooth
     plt.grid(True)
     plt.show()
 
+def main():
+    parser = argparse.ArgumentParser(description='Generate a sine wave table.')
+    parser.add_argument('--bit_count', type=int, default=8, help='The bit resolution for the sine wave values.')
+    parser.add_argument('--override_sample', type=int, default=None, help='Override the sample count for the sine wave table.')
+    parser.add_argument('--find_sample', type=int, default=None, help='Find the ideal sample count data, up to the specified bit resolution.')
+    parser.add_argument('--plot_sample', action='store_true', help='Plot the ideal sample count data.')
+    parser.add_argument('--plot_sine', action='store_true', help='Plot the generated sine wave.')
+    args = parser.parse_args()
+
+    bitResolution = args.bit_count
+    override_sampleCount = args.override_sample
+    find_sampleCounts = args.find_sample
+
+    # determine the optimal sample count or use the override value
+    if override_sampleCount:
+        sampleCount = override_sampleCount
+    else:
+        optimisation_results = optimise_sampleCount(bitResolution)
+        sampleCount = optimisation_results["optimal_sampleCount"]
+    deltaPhase = 360 / sampleCount
+
+    sine_table = generateSineTable(bitResolution=bitResolution, sampleCount=sampleCount)
+    print("\nSine wave table generated with bit resolution = {}, delta phase = {}, and {} samples".format(bitResolution, deltaPhase, len(sine_table)))
+
+    construct_sine_table_module(sine_table, bitResolution)
+    print("half_sine_table.v generated with SINE_SIZE = {} and TABLE_SIZE = {}".format(bitResolution, len(sine_table)))
+
+    update_sine_wave_macros(sine_table, bitResolution)
+    print("sine_wave.v updated with SINE_SIZE = {} and TABLE_SIZE = {}\n".format(bitResolution, len(sine_table)))
+
+    if find_sampleCounts:
+        bitsToCycle, idealSamples, params, x_smooth, y_smooth = find_ideal_sampleCount_data()
+        if args.plot_sample:
+            plot_ideal_sampleCount(bitsToCycle, idealSamples, params, x_smooth, y_smooth)
+
 if __name__ == '__main__':
-    find_ideal_sampleCount_data()
+    main()
