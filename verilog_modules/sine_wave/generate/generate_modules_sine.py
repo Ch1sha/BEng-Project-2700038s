@@ -1,4 +1,5 @@
 import argparse
+import concurrent.futures
 import os
 import math
 import matplotlib.pyplot as plt
@@ -7,6 +8,7 @@ import re
 from skopt import gp_minimize
 from skopt.space import Integer
 from skopt.utils import use_named_args
+from scipy.optimize import curve_fit
 # generate all modules in the verilog module root directory
 MODULE_ROOT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 
@@ -114,8 +116,8 @@ def optimise_sampleCount(bitCount, min_sample_val=None, max_sample_val=None, n_c
         dimensions=search_space,
         n_calls=n_calls,
         n_initial_points=n_initial_points,
-        random_state=random_state,
-        verbose=False
+        random_state=random_state, # For reproducibility
+        verbose=False,
     )
 
     # Extract and return the results
@@ -203,6 +205,60 @@ def main():
 
     update_sine_wave_macros(sine_table, bitResolution)
     print("sine_wave.v updated with SINE_SIZE = {} and TABLE_SIZE = {}\n".format(bitResolution, len(sine_table)))
+
+
+def plot_ideal_sampleCount_data(maxBits=16):
+    minBits = 2
+
+    def optimise_sampleCount_wrapper(bits):
+        return bits, optimise_sampleCount(bits)["optimal_sampleCount"]
+    
+    def thread_done_callback(future):
+        bits, optimal_sampleCount = future.result()
+        print(f"Thread done for bits: {bits}, optimal_sampleCount: {optimal_sampleCount}")
+
+    bitsToCycle = np.arange(minBits, maxBits+1)
+    print(bitsToCycle)
+
+    # Use ThreadPoolExecutor for multithreading
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(optimise_sampleCount_wrapper, bits) for bits in bitsToCycle]
+        for future in futures:
+            future.add_done_callback(thread_done_callback)
+
+    # Collect the results
+    results = [future.result() for future in futures]
+
+
+    # Populate the dictionary with the results
+    bit_idealSample_dict = {bits: optimal_sampleCount for bits, optimal_sampleCount in results}
+    print(bit_idealSample_dict)
+    idealSamples = list(bit_idealSample_dict.values())
+
+    # === Now try to fit the data to a curve
+    # Define the exponential function
+    exponential = lambda x, a, b, c : a * np.exp(b * x) + c
+    #fit the data to the exponential curve
+    params, covariance = curve_fit(exponential, bitsToCycle, idealSamples)
+    a, b, c = params
+    print(f"Exponential fit: a={a}, b={b}, c={c}")
+    # Generate smooth x values for plotting the fitted curve
+    x_smooth = np.linspace(min(bitsToCycle), max(bitsToCycle), 500)
+    y_smooth = exponential(x_smooth, a, b, c)
+    
+    # Plot the original data points
+    plt.scatter(bitsToCycle, idealSamples, label="Data Points", color="blue", zorder=5)
+
+    # Plot the fitted exponential curve
+    plt.plot(x_smooth, y_smooth, label=f"Fitted Curve: $y = {a:.2f}e^{{{b:.2f}x}} + {c:.2f}$", color="red", linewidth=2)
+
+    # Add labels, legend, and title
+    plt.xlabel('Bit Resolution')
+    plt.ylabel('Ideal Sample Count')
+    plt.title("Exponential Fit to Data")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
 
 if __name__ == '__main__':
     main()
