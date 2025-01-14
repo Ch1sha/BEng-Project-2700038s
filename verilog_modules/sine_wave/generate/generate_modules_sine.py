@@ -272,6 +272,7 @@ def main():
 
     # determine the optimal sample count or use the override value
     if override_sampleCount:
+        print("Overriding sample count with value: {}".format(override_sampleCount))
         sampleCount = override_sampleCount
     else:
         optimisation_results = optimise_sampleCount(bitResolution)
@@ -287,8 +288,10 @@ def main():
     update_sine_wave_macros(sine_table, bitResolution)
     print("sine_wave.v updated with SINE_SIZE = {} and TABLE_SIZE = {}\n".format(bitResolution, len(sine_table)))
 
+    if args.plot_sine:
+        plotSineWave(sine_table)
     if find_sampleCounts:
-        bitsToCycle, idealSamples, params, x_smooth, y_smooth = find_ideal_sampleCount_data()
+        bitsToCycle, idealSamples, params, x_smooth, y_smooth = find_ideal_sampleCount_data(int(find_sampleCounts))
         if args.plot_sample:
             plot_ideal_sampleCount(bitsToCycle, idealSamples, params, x_smooth, y_smooth)
 
