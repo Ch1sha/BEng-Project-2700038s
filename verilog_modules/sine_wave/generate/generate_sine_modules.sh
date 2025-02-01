@@ -59,6 +59,11 @@ while [[ "$#" -gt 0 ]]; do
             flag_string="${flag_string} --plot_sine"
             shift
             ;;
+        --no_generate)
+            NO_GENERATE=true
+            flag_string="${flag_string} --no_generate"
+            shift
+            ;;
         --plot_multiple)
             shift
             flag_string="${flag_string} --plot_multiple"
@@ -81,7 +86,11 @@ if [ "$BITCOUNT" = false ]; then
     BITCOUNT=8
 fi
 
-echo "Generating sine wave modules with ${BITCOUNT} bits"
+if $NO_GENERATE; then
+    echo "Skipping generation of sine wave modules"
+else
+    echo "Generating sine wave modules with ${BITCOUNT} bits"
+fi
 echo "==============================================="
 
 # Run the python script to generate the half_sine_table.v module and update the sine_table.v macros

@@ -288,9 +288,10 @@ def main():
     parser.add_argument('--bit_count', type=int, default=8, help='The bit resolution for the sine wave values.')
     parser.add_argument('--override_sample', type=int, default=None, help='Override the sample count for the sine wave table.')
     parser.add_argument('--find_sample', type=int, default=None, help='Find the ideal sample count data, up to the specified bit resolution.')
+    parser.add_argument('--plot_multiple', type=int, nargs='+', default=None, help='Plot multiple sine tables, x y z ... where x is the max bits, y is the sample count (0 for ideal samples), and z... are the bit resolutions to plot.')
     parser.add_argument('--plot_sample', action='store_true', help='Plot the ideal sample count data.')
     parser.add_argument('--plot_sine', action='store_true', help='Plot the generated sine wave.')
-    parser.add_argument('--plot_multiple', type=int, nargs='+', default=None, help='Plot multiple sine tables, x y z ... where x is the max bits, y is the sample count (0 for ideal samples), and z... are the bit resolutions to plot.')
+    parser.add_argument('--no_generate', action='store_true', help='Do not generate and update the sine wave verilog modules.')
     args = parser.parse_args()
 
     bitResolution = args.bit_count
@@ -306,14 +307,15 @@ def main():
         sampleCount = optimisation_results["optimal_sampleCount"]
     deltaPhase = 360 / sampleCount
 
-    sine_table = generateSineTable(bitResolution=bitResolution, sampleCount=sampleCount)
-    print("\nSine wave table generated with bit resolution = {}, delta phase = {}, and {} samples".format(bitResolution, deltaPhase, len(sine_table)))
+    if not args.no_generate:
+        sine_table = generateSineTable(bitResolution=bitResolution, sampleCount=sampleCount)
+        print("\nSine wave table generated with bit resolution = {}, delta phase = {}, and {} samples".format(bitResolution, deltaPhase, len(sine_table)))
 
-    construct_sine_table_module(sine_table, bitResolution)
-    print("half_sine_table.v generated with SINE_SIZE = {} and TABLE_SIZE = {}".format(bitResolution, len(sine_table)))
+        construct_sine_table_module(sine_table, bitResolution)
+        print("half_sine_table.v generated with SINE_SIZE = {} and TABLE_SIZE = {}".format(bitResolution, len(sine_table)))
 
-    update_sine_wave_macros(sine_table, bitResolution)
-    print("sine_wave.v updated with SINE_SIZE = {} and TABLE_SIZE = {}\n".format(bitResolution, len(sine_table)))
+        update_sine_wave_macros(sine_table, bitResolution)
+        print("sine_wave.v updated with SINE_SIZE = {} and TABLE_SIZE = {}\n".format(bitResolution, len(sine_table)))
 
     if args.plot_multiple:
         max_bits = args.plot_multiple[0]
