@@ -95,14 +95,18 @@ def optimise_sampleCount(bitCount, min_sample_val=None, max_sample_val=None, ran
         unique_values = len(np.unique(sine_table))
         repeated_values = sampleCount - unique_values
 
-        alpha = 0.05
+        sampleCountWeight = 0.2
+        repeatValueWeight = 0.4
+        smoothnessWeight = 0.4
         max_value = (2 ** bitCount) - 1
 
-        # Penalty if the highest value is not achieved
-        penalty = 0
-        if sine_table.max() < max_value:
-            penalty = 1000  # Large penalty to ensure this condition is prioritised
-        return repeated_values - (alpha * sampleCount) + penalty
+        # Scaled penalty if the highest value is not achieved
+        penalty = 1000 * (1 - (sine_table.max() / max_value))
+
+        # Measure smoothness: lower std of differences is better
+        smoothness_penalty = np.std(np.diff(sine_table))
+
+        return (repeatValueWeight * repeated_values) - (sampleCountWeight * sampleCount) + + (smoothnessWeight * smoothness_penalty) + penalty
 
     # Define the objective function to wrap the loss function
     @use_named_args(search_space)
@@ -257,6 +261,28 @@ def plot_ideal_sampleCount(bitsToCycle, idealSamples, params, x_smooth, y_smooth
     plt.grid(True)
     plt.show()
 
+def plot_multiple_sine_tables(max_bits, identicalSampleCount = None, wavesToPlot=None):
+    """
+    Generate and plot multiple sine tables for bit resolutions from 2 to max_bits.
+
+    :param max_bits: The maximum bit resolution to consider.
+    """
+    plt.figure(figsize=(10, 6))
+    
+    for bit_resolution in range(2, max_bits + 1):
+        if wavesToPlot and bit_resolution not in wavesToPlot:
+            continue
+        sample_count = identicalSampleCount if identicalSampleCount else optimise_sampleCount(bit_resolution)["optimal_sampleCount"]
+        sine_table = generateSineTable(bit_resolution, sample_count)
+        sine_table_normalised = sine_table / np.max(sine_table)  # Scale to have a maximum value of 1
+        plt.step(range(len(sine_table_normalised)), sine_table_normalised, label='{} bits'.format(bit_resolution), where='mid')
+
+    plt.title('Sine Tables for Different Bit Resolutions (Identical Samples)', fontsize=20)
+    plt.xlabel('Samples', fontsize=16)
+    plt.ylabel('Amplitude (Normalised)', fontsize=16)
+    plt.legend()
+    plt.grid(True)
+    plt.show()
 def main():
     parser = argparse.ArgumentParser(description='Generate a sine wave table.')
     parser.add_argument('--bit_count', type=int, default=8, help='The bit resolution for the sine wave values.')
@@ -264,6 +290,7 @@ def main():
     parser.add_argument('--find_sample', type=int, default=None, help='Find the ideal sample count data, up to the specified bit resolution.')
     parser.add_argument('--plot_sample', action='store_true', help='Plot the ideal sample count data.')
     parser.add_argument('--plot_sine', action='store_true', help='Plot the generated sine wave.')
+    parser.add_argument('--plot_multiple', type=int, nargs='+', default=None, help='Plot multiple sine tables, x y z ... where x is the max bits, y is the sample count (0 for ideal samples), and z... are the bit resolutions to plot.')
     args = parser.parse_args()
 
     bitResolution = args.bit_count
@@ -287,6 +314,12 @@ def main():
 
     update_sine_wave_macros(sine_table, bitResolution)
     print("sine_wave.v updated with SINE_SIZE = {} and TABLE_SIZE = {}\n".format(bitResolution, len(sine_table)))
+
+    if args.plot_multiple:
+        max_bits = args.plot_multiple[0]
+        sample_count = args.plot_multiple[1] if len(args.plot_multiple) > 1 else None
+        wavesToPlot = args.plot_multiple[2:] if len(args.plot_multiple) > 2 else None
+        plot_multiple_sine_tables(max_bits, sample_count, wavesToPlot)
 
     if args.plot_sine:
         plotSineWave(sine_table)

@@ -12,6 +12,7 @@ SAMPLE_OVERRIDE=false
 FIND_IDEAL_SAMPLES=false
 PLOT_SAMPLES=false
 PLOT_SINE=false
+PLOT_MULTIPLE=false
 
 flag_string=""
 
@@ -57,6 +58,15 @@ while [[ "$#" -gt 0 ]]; do
             PLOT_SINE=true
             flag_string="${flag_string} --plot_sine"
             shift
+            ;;
+        --plot_multiple)
+            shift
+            flag_string="${flag_string} --plot_multiple"
+            while [[ "$#" -gt 0 && "$1" =~ ^[0-9]+$ ]]; do
+                PLOT_MULTIPLE=true
+                flag_string="${flag_string} $1"
+                shift
+            done
             ;;
         *)
             echo "Unknown parameter passed: $1"

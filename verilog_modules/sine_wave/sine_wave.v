@@ -2,7 +2,7 @@
 /* verilator lint_off BLKSEQ */
 /* verilator lint_off REALCVT */
 `define SINE_SIZE 8
-`define TABLE_SIZE 44
+`define TABLE_SIZE 56
 `define TABLE_REG_SIZE 6
 `define PHASE_SIZE 8 // resolution for phase input (from -180º to 180º)
 
