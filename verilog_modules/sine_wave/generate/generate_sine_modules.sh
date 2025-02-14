@@ -73,6 +73,20 @@ while [[ "$#" -gt 0 ]]; do
                 shift
             done
             ;;
+        -h|--help)
+            echo "Usage: generate_sine_modules.sh [OPTIONS]"
+            echo "Options:"
+            echo "  --bit_count         Set the bit count of the sine wave (default: 8)"
+            echo "  --override_sample   Override the default sample count"
+            echo "  --find_sample       Find the ideal sample count up to the given bit resolution"
+            echo "  --plot_sample       Plot the ideal sample count"
+            echo "  --plot_sine         Plot the sine wave"
+            echo "  --no_generate       Skip generation of sine wave modules"
+            echo "  --plot_multiple     Plot multiple sine waves"
+            echo "                      Usage: --plot_multiple x y z_1 z_2... where x is the max bits, y is the optional sample count (0 for ideal samples), and z_1 z_2... are the optional bit resolutions to plot (no z values will plot all bit resolutions)"
+            echo "  -h                  Display this help message"
+            exit 0
+            ;;
         *)
             echo "Unknown parameter passed: $1"
             exit 1
