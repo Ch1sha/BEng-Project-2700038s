@@ -1,30 +1,39 @@
 /* verilator lint_off WIDTHEXPAND */
 /* verilator lint_off BLKSEQ */
 /* verilator lint_off REALCVT */
-`define SINE_SIZE 8
-`define TABLE_SIZE 56
-`define TABLE_REG_SIZE 6
-`define PHASE_SIZE 8 // resolution for phase input (from -180º to 180º)
 
-module sine_wave (
+//////////////////////////////////////////////////////////////////////////////////
+// Module Name: sine_wave
+// Description: Generates a sine wave based on the given phase and phase step.
+//              The sine wave is generated using a lookup table with a specified
+//              size and resolution. The module supports phase input and phase
+//              step input to control the phase increment.
+//////////////////////////////////////////////////////////////////////////////////
+
+module sine_wave #(
+    parameter int SINE_SIZE = 13,
+    parameter int TABLE_SIZE = 390,
+    parameter int TABLE_REG_SIZE = 9,
+    parameter int PHASE_SIZE = 8 // resolution for phase input (from -180º to 180º)
+) (
     input logic clock, 
     input logic reset,
-    input logic signed [`PHASE_SIZE:0] phase,     // phase input determines the starting point of the sine wave, no -1 to handle signed values
-    input logic signed [`PHASE_SIZE:0] phaseStep, // phase step input to control the phase increment
-    output logic [`SINE_SIZE-1:0] sine,           // n-bit Sine wave output
+    input logic signed [PHASE_SIZE:0] phase,     // phase input determines the starting point of the sine wave, no -1 to handle signed values
+    input logic signed [PHASE_SIZE:0] phaseStep, // phase step input to control the phase increment
+    output logic [SINE_SIZE-1:0] sine,           // n-bit Sine wave output
     output integer phaseIdxOut,
     output integer i
 );
 
-    logic [`SINE_SIZE-1:0] sine_wave_table [0:`TABLE_SIZE-1];
-    logic [`TABLE_REG_SIZE-1:0] logic_table_size;
+    logic [SINE_SIZE-1:0] sine_wave_table [0:TABLE_SIZE-1];
+    logic [TABLE_REG_SIZE-1:0] logic_table_size;
     half_sine_table sine_table_inst (
         .sine_wave(sine_wave_table),
         .table_size(logic_table_size)
     );
 
     // Signal to hold the previous value of phase
-    logic signed [`PHASE_SIZE:0] prev_phase;
+    logic signed [PHASE_SIZE:0] prev_phase;
     integer phaseIdx;
     integer tableSize;
     //integer i = phase; // Start from the given phase
@@ -35,7 +44,7 @@ module sine_wave (
         integer midpoint;
         integer start_index;
         begin
-            midpoint = (`TABLE_SIZE / 2);    // Exact midpoint index of the sine table
+            midpoint = (TABLE_SIZE / 2);    // Exact midpoint index of the sine table
 
             // Offset from midpoint
             start_index = midpoint + phaseIndex;
@@ -50,12 +59,12 @@ module sine_wave (
     endfunction
 
     // Takes in phase value in degrees and returns the corresponding phase value index for sine wave table
-    function signed [`PHASE_SIZE:0] phase_to_phaseVal(input signed [`PHASE_SIZE:0] phaseIn);
-        logic signed [`PHASE_SIZE:0] minVal; // Minimum phase value
-        logic signed [`PHASE_SIZE:0] maxVal; // Maximum phase value = midpoint
+    function signed [PHASE_SIZE:0] phase_to_phaseVal(input signed [PHASE_SIZE:0] phaseIn);
+        logic signed [PHASE_SIZE:0] minVal; // Minimum phase value
+        logic signed [PHASE_SIZE:0] maxVal; // Maximum phase value = midpoint
         begin
-            minVal = -3*(`TABLE_SIZE/2)+1;
-            maxVal = (`TABLE_SIZE/2) -1;
+            minVal = -3*(TABLE_SIZE/2)+1;
+            maxVal = (TABLE_SIZE/2) -1;
 
             if (phaseIn >= 0 && phaseIn <= 90) begin
                 // Map [0º, 90º] to [0, maxVal]
@@ -67,7 +76,7 @@ module sine_wave (
             end
             else if (phaseIn >= -180 && phaseIn < 0) begin
                 // Map [-180º, 0º] to [TABLE_SIZE, 0]
-                phase_to_phaseVal = -`TABLE_SIZE + $floor((phaseIn + 180) * `TABLE_SIZE / 180);
+                phase_to_phaseVal = -TABLE_SIZE + $floor((phaseIn + 180) * TABLE_SIZE / 180);
             end
             else begin
                 // Clamp phase to valid range [-180º, 180º]
@@ -100,7 +109,7 @@ module sine_wave (
                     end
                     default: begin
                         // General case: forward traversal
-                        reverseTraversal <= (i < `TABLE_SIZE - 1) ? 0 : 1;
+                        reverseTraversal <= (i < TABLE_SIZE - 1) ? 0 : 1;
                     end
                 endcase
             end else begin
