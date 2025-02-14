@@ -9,6 +9,8 @@ from skopt import gp_minimize
 from skopt.space import Integer
 from skopt.utils import use_named_args
 from scipy.optimize import curve_fit
+import matplotlib.cm as cm
+
 # generate all modules in the verilog module root directory
 MODULE_ROOT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 
@@ -259,6 +261,7 @@ def plot_ideal_sampleCount(bitsToCycle, idealSamples, params, x_smooth, y_smooth
     plt.title("Exponential Fit to Data")
     plt.legend()
     plt.grid(True)
+    plt.tight_layout()  # Adjust the padding between and around subplots
     plt.show()
 
 def plot_multiple_sine_tables(max_bits, identicalSampleCount = None, wavesToPlot=None):
@@ -267,22 +270,50 @@ def plot_multiple_sine_tables(max_bits, identicalSampleCount = None, wavesToPlot
 
     :param max_bits: The maximum bit resolution to consider.
     """
-    plt.figure(figsize=(10, 6))
-    
+    plt.figure(figsize=(14, 10))
+    colormap = cm.get_cmap('viridis', max_bits - 1)
+
+    # First subplot: Linear scale
+    plt.subplot(2, 1, 1)
     for bit_resolution in range(2, max_bits + 1):
         if wavesToPlot and bit_resolution not in wavesToPlot:
             continue
         sample_count = identicalSampleCount if identicalSampleCount else optimise_sampleCount(bit_resolution)["optimal_sampleCount"]
         sine_table = generateSineTable(bit_resolution, sample_count)
         sine_table_normalised = sine_table / np.max(sine_table)  # Scale to have a maximum value of 1
-        plt.step(range(len(sine_table_normalised)), sine_table_normalised, label='{} bits'.format(bit_resolution), where='mid')
-
-    plt.title('Sine Tables for Different Bit Resolutions (Identical Samples)', fontsize=20)
-    plt.xlabel('Samples', fontsize=16)
-    plt.ylabel('Amplitude (Normalised)', fontsize=16)
+        color = colormap(bit_resolution - 2)
+        plt.step(range(len(sine_table_normalised)), sine_table_normalised, label='{} bits'.format(bit_resolution), where='mid', color=color)
+    
+    title_part = "Identical Samples" if identicalSampleCount else "Optimal Samples"
+    plt.title('Sine Tables for Different Bit Resolutions ({})'.format(title_part), fontsize=16)
+    plt.xlabel('Samples', fontsize=12)
+    plt.ylabel('Amplitude (Normalised)', fontsize=12)
     plt.legend()
+    #plt.legend()
     plt.grid(True)
+
+    # Second subplot: Logarithmic scale if identicalSampleCount is None
+    if not identicalSampleCount:
+        plt.subplot(2, 1, 2)
+        for bit_resolution in range(2, max_bits + 1):
+            if wavesToPlot and bit_resolution not in wavesToPlot:
+                continue
+            sample_count = optimise_sampleCount(bit_resolution)["optimal_sampleCount"]
+            sine_table = generateSineTable(bit_resolution, sample_count)
+            sine_table_normalised = sine_table / np.max(sine_table)  # Scale to have a maximum value of 1
+            color = colormap(bit_resolution - 2)
+            plt.step(range(len(sine_table_normalised)), sine_table_normalised, label='{} bits'.format(bit_resolution), where='mid', color=color)
+        
+        plt.xscale('log')
+        plt.xlabel('Samples (Log Scale)', fontsize=12)
+        plt.ylabel('Amplitude (Normalised)', fontsize=12)
+        plt.legend()
+        plt.grid(True)
+
+    plt.tight_layout()  # Adjust the padding between and around subplots
     plt.show()
+
+
 def main():
     parser = argparse.ArgumentParser(description='Generate a sine wave table.')
     parser.add_argument('--bit_count', type=int, default=8, help='The bit resolution for the sine wave values.')
