@@ -21,7 +21,7 @@ module adc_buffer #(
     output logic [DATA_WIDTH-1:0] data_out // Data output (parameterized width)
 );
 
-    logic [7:0] memory [0:4095];
+    logic [DATA_WIDTH-1:0] memory [0:4095];
 
     // Write and read – note that many FPGAs support inferring a dual‑port block RAM
     always @(posedge clock) begin
