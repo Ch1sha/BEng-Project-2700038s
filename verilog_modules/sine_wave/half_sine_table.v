@@ -7,15 +7,15 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module half_sine_table #(
-    parameter int SINE_SIZE = 12,
-    parameter int TABLE_SIZE = 268,
-    parameter int TABLE_REG_SIZE = 9
+    parameter SINE_SIZE = 12,
+    parameter TABLE_SIZE = 268,
+    parameter TABLE_REG_SIZE = 9
 ) (
     output logic [SINE_SIZE-1:0] sine_wave [0:TABLE_SIZE-1],
     output logic [TABLE_REG_SIZE-1:0] table_size
 );
     initial begin
-        table_size = TABLE_SIZE-1;
+        table_size = $signed(TABLE_SIZE-1)[8:0];
         sine_wave[0] = 0;
         sine_wave[1] = 0;
         sine_wave[2] = 1;

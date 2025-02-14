@@ -11,10 +11,10 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module sine_wave #(
-    parameter int SINE_SIZE = 12,
-    parameter int TABLE_SIZE = 268,
-    parameter int TABLE_REG_SIZE = 9,
-    parameter int PHASE_SIZE = 8 // resolution for phase input (from -180º to 180º)
+    parameter SINE_SIZE = 12,
+    parameter TABLE_SIZE = 268,
+    parameter TABLE_REG_SIZE = 9,
+    parameter PHASE_SIZE = 8 // resolution for phase input (from -180º to 180º)
 ) (
     input logic clock, 
     input logic reset,
