@@ -11,8 +11,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module sine_wave #(
-    parameter int SINE_SIZE = 13,
-    parameter int TABLE_SIZE = 390,
+    parameter int SINE_SIZE = 12,
+    parameter int TABLE_SIZE = 268,
     parameter int TABLE_REG_SIZE = 9,
     parameter int PHASE_SIZE = 8 // resolution for phase input (from -180º to 180º)
 ) (
@@ -27,7 +27,11 @@ module sine_wave #(
 
     logic [SINE_SIZE-1:0] sine_wave_table [0:TABLE_SIZE-1];
     logic [TABLE_REG_SIZE-1:0] logic_table_size;
-    half_sine_table sine_table_inst (
+    half_sine_table #(
+        .SINE_SIZE(SINE_SIZE),
+        .TABLE_SIZE(TABLE_SIZE),
+        .TABLE_REG_SIZE(TABLE_REG_SIZE)
+    ) sine_table_inst (
         .sine_wave(sine_wave_table),
         .table_size(logic_table_size)
     );
