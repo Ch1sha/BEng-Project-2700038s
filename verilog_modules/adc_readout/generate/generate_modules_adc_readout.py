@@ -61,7 +61,7 @@ def update_adc_buffer(DATA_WIDTH: int, BUFFER_SIZE: int):
         BUFFER_SIZE (int): Size of the buffer.
     """
 
-    parameters = {"DATA_WIDTH": DATA_WIDTH, "BUFFER_SIZE": BUFFER_SIZE, "ADDR_WIDTH": math.ceil(math.log2(BUFFER_SIZE+1))}
+    parameters = {"DATA_WIDTH": DATA_WIDTH, "BUFFER_SIZE": BUFFER_SIZE, "ADDR_WIDTH": math.ceil(math.log2(BUFFER_SIZE))}
     update_verilog_parameters(parameters, 'adc_buffer.v')
 
 def main():

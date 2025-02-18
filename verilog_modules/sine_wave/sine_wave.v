@@ -10,6 +10,7 @@
 //              step input to control the phase increment.
 //////////////////////////////////////////////////////////////////////////////////
 
+//TODO: Get rid of TABLE_REG_SIZE
 module sine_wave #(
     parameter SINE_SIZE = 12,
     parameter TABLE_SIZE = 268,

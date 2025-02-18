@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module adc_readout# (
-    parameter DATA_WIDTH = 8  // Parameter to define the width of the ADC input
+    parameter DATA_WIDTH = 12  // Parameter to define the width of the ADC input
 ) (
     input  wire        adc_clock,      // ADC clock
     input  wire        reset,          // Synchronous reset (active high)

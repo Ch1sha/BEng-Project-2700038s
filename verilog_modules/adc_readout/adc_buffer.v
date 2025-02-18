@@ -8,7 +8,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module adc_buffer #(
-    parameter DATA_WIDTH = 8  // Parameter to define the width of the ADC input
+    parameter DATA_WIDTH = 12  // Parameter to define the width of the ADC input
     parameter BUFFER_SIZE = 4096 // Parameter to define the buffer size
     parameter ADDR_WIDTH = 12 // Parameter to define the address width (log2(BUFFER_SIZE))
 ) (
@@ -16,10 +16,10 @@ module adc_buffer #(
     input  logic        reset,       // Synchronous reset (if desired; see note below)
     // Write port
     input  logic        write_en,    // Write enable signal (active high)
-    input  logic [11:0] write_addr,  // 12‑bit write address (0 to 4095)
+    input  logic [ADDR_WIDTH-1:0] write_addr,  // 12‑bit write address (0 to 4095)
     input  logic [DATA_WIDTH-1:0] data_in, // ADC sample input (parameterized width)
     // Read port
-    input  logic [11:0] read_addr,   // 12‑bit read address
+    input  logic [ADDR_WIDTH-1:0] read_addr,   // 12‑bit read address
     output logic [DATA_WIDTH-1:0] data_out // Data output (parameterized width)
 );
 
@@ -36,7 +36,6 @@ module adc_buffer #(
             if (write_en)
                 memory[write_addr] <= data_in;
             // Read operation (synchronous read)
-            data_out <= memory[read_addr];
         end
     end
 
