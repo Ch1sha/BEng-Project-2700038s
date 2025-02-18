@@ -71,10 +71,11 @@ def main():
     parser.add_argument('--no_generate', action='store_true', help='Do not generate and update the sine wave verilog modules.')
     args = parser.parse_args()
 
+    data_width = args.data_width
+    buffer_size = args.buffer_size
+
     if not args.no_generate:
         print("Generating ADC readout modules...")
-        data_width = args.data_width
-        buffer_size = args.buffer_size
         print(f"Data width: {data_width}")
         print(f"Buffer size: {buffer_size}")   
         update_adc_readout(data_width)
