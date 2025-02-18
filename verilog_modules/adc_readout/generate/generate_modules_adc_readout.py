@@ -5,3 +5,37 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 import re
+
+MODULE_ROOT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+
+def update_verilog_parameters(parameters: dict, filename):
+    """
+    Update the parameters in the Verilog file with the given dictionary.
+
+    Args:
+        parameters (dict): Dictionary containing the parameter names and values.
+        filename (str): Name of the Verilog file
+    """
+
+    file_path = os.path.join(MODULE_ROOT_PATH, filename)
+
+    with open(file_path, 'r') as file:
+        content = file.read()
+
+    # Regex pattern to match Verilog parameters (e.g., parameter NAME = VALUE)
+    pattern = r"parameter\s+int\s+(\w+)\s*=\s*(\d+)"
+
+    # Function to replace the parameter value
+    def replacer(match):
+        param_name = match.group(1)
+        # Replace the parameter value if it's in the dictionary
+        if param_name in parameters:
+            new_value = parameters[param_name]
+            return f"parameter int {param_name} = {new_value}"
+        return match.group(0)  # Keep the original line if parameter not in dictionary
+    
+    # replace the parameters in the verilog file
+    updated_verilog_content = re.sub(pattern, replacer, content)
+
+    with open(file_path, 'w') as file:
+        file.write(updated_verilog_content)
