@@ -9,6 +9,8 @@
 
 module adc_buffer #(
     parameter DATA_WIDTH = 8  // Parameter to define the width of the ADC input
+    parameter BUFFER_SIZE = 4096 // Parameter to define the buffer size
+    parameter ADDR_WIDTH = 12 // Parameter to define the address width (log2(BUFFER_SIZE))
 ) (
     input  logic        clock,       // Common clock (assumed same for read & write)
     input  logic        reset,       // Synchronous reset (if desired; see note below)
@@ -21,7 +23,7 @@ module adc_buffer #(
     output logic [DATA_WIDTH-1:0] data_out // Data output (parameterized width)
 );
 
-    logic [DATA_WIDTH-1:0] memory [0:4095];
+    logic [DATA_WIDTH-1:0] memory [0:BUFFER_SIZE-1]; // 4096 locations of 8‑bit width
 
     // Write and read – note that many FPGAs support inferring a dual‑port block RAM
     always @(posedge clock) begin

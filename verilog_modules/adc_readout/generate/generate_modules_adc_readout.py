@@ -39,3 +39,27 @@ def update_verilog_parameters(parameters: dict, filename):
 
     with open(file_path, 'w') as file:
         file.write(updated_verilog_content)
+
+
+def update_adc_readout(DATA_WIDTH: int):
+    """
+    Update the parameters in the ADC readout module with the given dictionary.
+
+    Args:
+        DATA_WIDTH (int): Data width of the ADC readout module.
+    """
+
+    parameters = {"DATA_WIDTH": DATA_WIDTH}
+    update_verilog_parameters(parameters, 'adc_readout.v')
+
+def update_adc_buffer(DATA_WIDTH: int, BUFFER_SIZE: int):
+    """
+    Update the parameters in the ADC buffer module with the given dictionary.
+
+    Args:
+        DATA_WIDTH (int): Data width of the ADC buffer module.
+        BUFFER_SIZE (int): Size of the buffer.
+    """
+
+    parameters = {"DATA_WIDTH": DATA_WIDTH, "BUFFER_SIZE": BUFFER_SIZE, "ADDR_WIDTH": math.ceil(math.log2(BUFFER_SIZE))}
+    update_verilog_parameters(parameters, 'adc_buffer.v')
