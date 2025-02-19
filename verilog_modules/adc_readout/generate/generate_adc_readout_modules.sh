@@ -41,12 +41,23 @@ while [[ "$#" -gt 0 ]]; do
             flag_string="${flag_string} --no_generate"
             shift
             ;;
+        --sim_adc)
+            shift
+            flag_string="${flag_string} --sim_adc"
+            while [[ "$#" -gt 0 && "$1" =~ ^[0-9]+$ ]]; do
+                PLOT_MULTIPLE=true
+                flag_string="${flag_string} $1"
+                shift
+            done
+            ;;
         -h|--help)
             echo "Usage: generate_adc_readout_modules.sh [OPTIONS]"
             echo "Options:"
             echo "  --data_width        Set the data width of the ADC readout"
             echo "  --buffer_size       Set the buffer size for the ADC readout"
             echo "  --no_generate       Skip generation of ADC readout modules"
+            echo "  --sim_adc           Simulate the ADC readout module"
+            echo "                      Usage: --sim_adc x y z where x is the wave frequency, y is the number of adc output samples, and z is the sample rate"
             echo "  -h, --help          Display this help message"
             exit 0
             ;;
