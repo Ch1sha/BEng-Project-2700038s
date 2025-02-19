@@ -1,5 +1,4 @@
 import argparse
-import concurrent.futures
 import os
 import math
 import matplotlib.pyplot as plt
@@ -119,6 +118,7 @@ def main():
     parser.add_argument('--buffer_size', type=int, default=4096, help='Size of the buffer')
     parser.add_argument('--no_generate', action='store_true', help='Do not generate and update the sine wave verilog modules.')
     parser.add_argument('--sim_adc',type=int, nargs='+', default=1, help='Simulate the ADC output and export to a CSV file: x y z where x is the wave frequency, y is the number of adc output samples, and z is the sample rate')
+    parser.add_argument('--plot', action='store_true', help='Plot the simulated ADC output')
     args = parser.parse_args()
 
     data_width = args.data_width
@@ -130,7 +130,7 @@ def main():
         print(f"Buffer size: {buffer_size}")   
         update_adc_readout(data_width)
         update_adc_buffer(data_width, buffer_size)
-    
+   
     if args.sim_adc:
         frequency = args.sim_adc[0]
         num_samples = args.sim_adc[1] if len(args.sim_adc) > 1 else 4096
@@ -142,8 +142,9 @@ def main():
         # export the ADC output to a CSV file
         export_to_csv(adc_output, os.path.join(ADC_OUTPUT_SIMULATION_PATH, 'adc_output.csv'))
 
-        # plot the sine wave
-        plotSineWave(adc_output)
+        if args.plot:
+            print("Plotting the simulated ADC output...")
+            plotSineWave(adc_output)
 
 if __name__ == "__main__":
     main()
