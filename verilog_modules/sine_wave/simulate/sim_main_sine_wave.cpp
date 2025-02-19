@@ -60,8 +60,12 @@ int main(int argc, char** argv) {
 
         // Set phase to 0 after 80 cycles
         if (cycleCount == 150){
+            //top->phase = -90;
+            //top->phaseStep = 3;
+        }
+        if (cycleCount == 300){
             //top->phase = 0;
-            top->phaseStep = 2;
+            //top->phaseStep = 10;
         }
 
         // Evaluate model on both edges
