@@ -14,8 +14,8 @@ t = data['i']
 
 # Plot the sine wave
 plt.step(x, y)
-plt.title('Sine Wave')
-plt.xlabel('sample')
-plt.ylabel('sine wave')
+plt.title('Sine Wave Simulation', fontsize=20)
+plt.xlabel('Clock Cycle',fontsize=16)
+plt.ylabel('Amplitude (uint)', fontsize=16)
 plt.grid(True)
 plt.show()

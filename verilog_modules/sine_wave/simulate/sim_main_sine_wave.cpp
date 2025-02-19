@@ -32,6 +32,7 @@ int main(int argc, char** argv) {
     top->clock = 0;
     top->reset = 0;
     top->phase = phase;
+    top->phaseStep = 1;
 
     // Print csv headers
     std::cout << "c,s,p,i" << std::endl;
@@ -58,8 +59,13 @@ int main(int argc, char** argv) {
         top->clock = !top->clock; // Toggle clock
 
         // Set phase to 0 after 80 cycles
-        if (cycleCount == 80){
-            top->phase = 0;
+        if (cycleCount == 150){
+            //top->phase = -90;
+            //top->phaseStep = 3;
+        }
+        if (cycleCount == 300){
+            //top->phase = 0;
+            //top->phaseStep = 10;
         }
 
         // Evaluate model on both edges

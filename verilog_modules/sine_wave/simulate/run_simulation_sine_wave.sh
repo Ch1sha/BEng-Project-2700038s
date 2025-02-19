@@ -54,6 +54,15 @@ while [[ "$#" -gt 0 ]]; do
                 exit 1
             fi
             ;;
+        -h|--help)
+            echo "Usage: run_simulation_sine_wave.sh [OPTIONS]"
+            echo "Options:"
+            echo "  --plot          Plot the output of the simulation"
+            echo "  --sim_time      Set the simulation time in cycles (default: 250)"
+            echo "  --phase         Set the phase of the sine wave in cycles (default: 0)"
+            echo "  -h              Display this help message"
+            exit 0
+            ;;
         *)
             echo "Unknown parameter passed: $1"
             exit 1

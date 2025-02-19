@@ -1,29 +1,44 @@
 /* verilator lint_off WIDTHEXPAND */
 /* verilator lint_off BLKSEQ */
 /* verilator lint_off REALCVT */
-`define SINE_SIZE 8
-`define TABLE_SIZE 64
-`define TABLE_REG_SIZE 7
-`define PHASE_SIZE 8 // resolution for phase input (from -180º to 180º)
 
-module sine_wave (
+//////////////////////////////////////////////////////////////////////////////////
+// Module Name: sine_wave
+// Description: Generates a sine wave based on the given phase and phase step.
+//              The sine wave is generated using a lookup table with a specified
+//              size and resolution. The module supports phase input and phase
+//              step input to control the phase increment.
+//////////////////////////////////////////////////////////////////////////////////
+
+//TODO: Get rid of TABLE_REG_SIZE
+module sine_wave #(
+    parameter SINE_SIZE = 12,
+    parameter TABLE_SIZE = 268,
+    parameter TABLE_REG_SIZE = 9,
+    parameter PHASE_SIZE = 8 // resolution for phase input (from -180º to 180º)
+) (
     input logic clock, 
     input logic reset,
-    input logic signed [`PHASE_SIZE:0] phase, // phase input determines the starting point of the sine wave, no -1 to handle signed values
-    output logic [`SINE_SIZE-1:0] sine, // n-bit Sine wave output
+    input logic signed [PHASE_SIZE:0] phase,     // phase input determines the starting point of the sine wave, no -1 to handle signed values
+    input logic signed [PHASE_SIZE:0] phaseStep, // phase step input to control the phase increment
+    output logic [SINE_SIZE-1:0] sine,           // n-bit Sine wave output
     output integer phaseIdxOut,
     output integer i
 );
 
-    logic [`SINE_SIZE-1:0] sine_wave_table [0:`TABLE_SIZE-1]; // 50 samples of sine wave
-    logic [`TABLE_REG_SIZE-1:0] logic_table_size;
-    half_sine_table sine_table_inst (
+    logic [SINE_SIZE-1:0] sine_wave_table [0:TABLE_SIZE-1];
+    logic [TABLE_REG_SIZE-1:0] logic_table_size;
+    half_sine_table #(
+        .SINE_SIZE(SINE_SIZE),
+        .TABLE_SIZE(TABLE_SIZE),
+        .TABLE_REG_SIZE(TABLE_REG_SIZE)
+    ) sine_table_inst (
         .sine_wave(sine_wave_table),
         .table_size(logic_table_size)
     );
 
     // Signal to hold the previous value of phase
-    logic signed [`PHASE_SIZE:0] prev_phase;
+    logic signed [PHASE_SIZE:0] prev_phase;
     integer phaseIdx;
     integer tableSize;
     //integer i = phase; // Start from the given phase
@@ -34,7 +49,7 @@ module sine_wave (
         integer midpoint;
         integer start_index;
         begin
-            midpoint = (`TABLE_SIZE / 2); // Exact midpoint index of the sine table
+            midpoint = (TABLE_SIZE / 2);    // Exact midpoint index of the sine table
 
             // Offset from midpoint
             start_index = midpoint + phaseIndex;
@@ -49,12 +64,12 @@ module sine_wave (
     endfunction
 
     // Takes in phase value in degrees and returns the corresponding phase value index for sine wave table
-    function signed [`PHASE_SIZE:0] phase_to_phaseVal(input signed [`PHASE_SIZE:0] phaseIn);
-        logic signed [`PHASE_SIZE:0] minVal; // Minimum phase value
-        logic signed [`PHASE_SIZE:0] maxVal; // Maximum phase value = midpoint
+    function signed [PHASE_SIZE:0] phase_to_phaseVal(input signed [PHASE_SIZE:0] phaseIn);
+        logic signed [PHASE_SIZE:0] minVal; // Minimum phase value
+        logic signed [PHASE_SIZE:0] maxVal; // Maximum phase value = midpoint
         begin
-            minVal = -3*(`TABLE_SIZE/2)+1;
-            maxVal = (`TABLE_SIZE/2) -1;
+            minVal = -3*(TABLE_SIZE/2)+1;
+            maxVal = (TABLE_SIZE/2) -1;
 
             if (phaseIn >= 0 && phaseIn <= 90) begin
                 // Map [0º, 90º] to [0, maxVal]
@@ -66,7 +81,7 @@ module sine_wave (
             end
             else if (phaseIn >= -180 && phaseIn < 0) begin
                 // Map [-180º, 0º] to [TABLE_SIZE, 0]
-                phase_to_phaseVal = -`TABLE_SIZE + $floor((phaseIn + 180) * `TABLE_SIZE / 180);
+                phase_to_phaseVal = -TABLE_SIZE + $floor((phaseIn + 180) * TABLE_SIZE / 180);
             end
             else begin
                 // Clamp phase to valid range [-180º, 180º]
@@ -77,8 +92,8 @@ module sine_wave (
 
     always_ff @(posedge clock or posedge reset) begin
         if (reset || phase != prev_phase) begin
-            tableSize <= logic_table_size; // Assign constant table size on reset
-            prev_phase <= phase; // Update previous phase
+            tableSize <= logic_table_size;   // Assign constant table size on reset
+            prev_phase <= phase;             // Update previous phase
 
             // Convert input phase into table index
             phaseIdx = phase_to_phaseVal(phase);
@@ -99,7 +114,7 @@ module sine_wave (
                     end
                     default: begin
                         // General case: forward traversal
-                        reverseTraversal <= (i < `TABLE_SIZE - 1) ? 0 : 1;
+                        reverseTraversal <= (i < TABLE_SIZE - 1) ? 0 : 1;
                     end
                 endcase
             end else begin
@@ -119,23 +134,30 @@ module sine_wave (
                 endcase
             end
 
-            sine <= sine_wave_table[i]; // Initial output
+            sine <= sine_wave_table[i];      // Initial output
 
         end else begin
             // Output current sine wave sample
             sine <= sine_wave_table[i];
 
             // Update index based on traversal direction
-            if (!reverseTraversal) begin // Forward traversal
-                if (i == tableSize - 1) begin
-                    reverseTraversal <= 1; // Switch to reverse traversal at the end
-                end 
-                i <= i + 1; // Continue moving forward
-            end else begin // Reverse traversal
-                if (i == 1) begin
-                    reverseTraversal <= 0; // Switch to forward traversal at the start
+            if (!reverseTraversal) begin     // Forward traversal
+                if (i >= tableSize - phaseStep) begin
+                    reverseTraversal <= 1;   // Switch to reverse traversal at the end
                 end
-                i <= i - 1; // Continue moving back
+
+                if (i + phaseStep <= tableSize) begin
+                    i <= i + phaseStep;      // Only increment if within bounds
+                end
+
+            end else begin                   // Reverse traversal
+                if (i <= phaseStep) begin
+                    reverseTraversal <= 0;   // Switch to forward traversal at the start
+                end
+
+                if (i - phaseStep >= 0) begin
+                    i <= (i - phaseStep);    // Only decrement if within bounds
+                end
             end
         end
     end
