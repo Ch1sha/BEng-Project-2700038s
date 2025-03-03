@@ -8,8 +8,8 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module adc_buffer #(
-    parameter DATA_WIDTH = 12  // Parameter to define the width of the ADC input
-    parameter BUFFER_SIZE = 4096 // Parameter to define the buffer size
+    parameter DATA_WIDTH = 12,  // Parameter to define the width of the ADC input
+    parameter BUFFER_SIZE = 4096, // Parameter to define the buffer size
     parameter ADDR_WIDTH = 12 // Parameter to define the address width (log2(BUFFER_SIZE))
 ) (
     input  logic        clock,       // Common clock (assumed same for read & write)
