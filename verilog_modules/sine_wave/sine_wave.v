@@ -18,8 +18,8 @@ module sine_wave #(
     input  wire signed [PHASE_SIZE:0] phase,     // Phase input determines the starting point of the sine wave
     input  wire signed [PHASE_SIZE:0] phaseStep,   // Phase step input to control the phase increment
     output reg  [SINE_SIZE-1:0]       sine,      // n-bit sine wave output
-    output reg  integer               phaseIdxOut,
-    output reg  integer               i
+    output reg  signed [PHASE_SIZE:0] phaseIdxOut,
+    output integer                    i
 );
 
     // Wires to connect to the half-sine table ROM
