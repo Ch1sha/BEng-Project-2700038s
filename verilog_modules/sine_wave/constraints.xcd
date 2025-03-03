@@ -15,14 +15,18 @@ set_property PULLUP true [get_ports reset]       ;# Active-low button
 ##############################
 ## General-Purpose I/O (GPIO)
 ##############################
+# Define variables for the number of phase and sine signals
+set PHASE_SIZE 9
+set SINE_SIZE 12
+
 # Example: Assign phase[8:0] to PL_USER_SW (slide switches)
-for {set i 0} {$i < 9} {incr i} {
+for {set i 0} {$i < $PHASE_SIZE} {incr i} {
     set_property PACKAGE_PIN [lindex {AN13 AU12 AW11 AV11} $i] [get_ports phase[$i]]
     set_property IOSTANDARD LVCMOS18 [get_ports phase[$i]]
 }
 
 # Example: Assign sine[11:0] to PL_USER_LED (LEDs)
-for {set i 0} {$i < 12} {incr i} {
+for {set i 0} {$i < $SINE_SIZE} {incr i} {
     set_property PACKAGE_PIN [lindex {AR11 AW10 AT11 AU10 AM8 AM7 AN8 AR12 AP8 AT10} $i] [get_ports sine[$i]]
     set_property IOSTANDARD LVCMOS18 [get_ports sine[$i]]
 }
