@@ -153,7 +153,7 @@ def optimise_sampleCount(bitCount, min_sample_val=None, max_sample_val=None, ran
 
 # ============ sine_wave.v generation ============ #
 
-def update_sine_wave_macros(sine_table: np.ndarray, bitResolution: int, filename = 'sine_wave.v'):
+def update_verilog_macros(sine_table: np.ndarray, bitResolution: int, filename = 'sine_wave.v'):
     """
     Update the parameter definitions for the sine_wave.v module.
 
@@ -360,9 +360,11 @@ def main():
         construct_sine_table_module(sine_table, bitResolution)
         print("half_sine_table.v generated with SINE_SIZE = {} and TABLE_SIZE = {}".format(bitResolution, len(sine_table)))
 
-        update_sine_wave_macros(sine_table, bitResolution)
+        update_verilog_macros(sine_table, bitResolution)
         print("sine_wave.v updated with SINE_SIZE = {} and TABLE_SIZE = {}\n".format(bitResolution, len(sine_table)))
 
+        update_verilog_macros(sine_table, bitResolution, 'signal_gen_top.v')
+        print("signal_gen_top.v updated with SINE_SIZE = {} and TABLE_SIZE = {}\n".format(bitResolution, len(sine_table)))
     if args.plot_multiple:
         max_bits = args.plot_multiple[0]
         sample_count = args.plot_multiple[1] if len(args.plot_multiple) > 1 else None
