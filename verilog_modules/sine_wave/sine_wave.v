@@ -10,24 +10,25 @@
 //              step input to control the phase increment.
 //////////////////////////////////////////////////////////////////////////////////
 
-//TODO: Get rid of TABLE_REG_SIZE
 module sine_wave #(
     parameter SINE_SIZE = 12,
     parameter TABLE_SIZE = 268,
     parameter TABLE_REG_SIZE = 9,
     parameter PHASE_SIZE = 8 // resolution for phase input (from -180º to 180º)
 ) (
-    input logic clock, 
-    input logic reset,
-    input logic signed [PHASE_SIZE:0] phase,     // phase input determines the starting point of the sine wave, no -1 to handle signed values
-    input logic signed [PHASE_SIZE:0] phaseStep, // phase step input to control the phase increment
-    output logic [SINE_SIZE-1:0] sine,           // n-bit Sine wave output
-    output integer phaseIdxOut,
-    output integer i
+    input wire clock, 
+    input wire reset,
+    input wire signed [PHASE_SIZE:0] phase,     // phase input determines the starting point of the sine wave
+    input wire signed [PHASE_SIZE:0] phaseStep,   // phase step input to control the phase increment
+    output reg [SINE_SIZE-1:0] sine,              // n-bit Sine wave output
+    output reg integer phaseIdxOut,
+    output reg integer i
 );
 
-    logic [SINE_SIZE-1:0] sine_wave_table [0:TABLE_SIZE-1];
-    logic [TABLE_REG_SIZE-1:0] logic_table_size;
+    reg [SINE_SIZE-1:0] sine_wave_table [0:TABLE_SIZE-1];
+    reg [TABLE_REG_SIZE-1:0] logic_table_size;
+    
+    // Instantiate the half sine table module
     half_sine_table #(
         .SINE_SIZE(SINE_SIZE),
         .TABLE_SIZE(TABLE_SIZE),
@@ -38,14 +39,14 @@ module sine_wave #(
     );
 
     // Signal to hold the previous value of phase
-    logic signed [PHASE_SIZE:0] prev_phase;
+    reg signed [PHASE_SIZE:0] prev_phase;
     integer phaseIdx;
     integer tableSize;
-    //integer i = phase; // Start from the given phase
-    logic reverseTraversal = 0; // Reverse traversal flag
+    reg reverseTraversal; // Reverse traversal flag
 
     // Function to calculate the starting index based on phase
-    function integer calculate_start_index(input integer phaseIndex);
+    function integer calculate_start_index;
+        input integer phaseIndex;
         integer midpoint;
         integer start_index;
         begin
@@ -55,45 +56,40 @@ module sine_wave #(
             start_index = midpoint + phaseIndex;
 
             // Ensure the index is positive
-            if (start_index < 0) begin
+            if (start_index < 0)
                 start_index = -start_index;
-            end
-
             calculate_start_index = start_index;
         end
     endfunction
 
-    // Takes in phase value in degrees and returns the corresponding phase value index for sine wave table
-    function signed [PHASE_SIZE:0] phase_to_phaseVal(input signed [PHASE_SIZE:0] phaseIn);
-        logic signed [PHASE_SIZE:0] minVal; // Minimum phase value
-        logic signed [PHASE_SIZE:0] maxVal; // Maximum phase value = midpoint
+    // Function: Converts phase in degrees to a table index value.
+    function signed [PHASE_SIZE:0] phase_to_phaseVal;
+        input signed [PHASE_SIZE:0] phaseIn;
+        reg signed [PHASE_SIZE:0] minVal; // Minimum phase value
+        reg signed [PHASE_SIZE:0] maxVal; // Maximum phase value = midpoint
         begin
             minVal = -3*(TABLE_SIZE/2)+1;
             maxVal = (TABLE_SIZE/2) -1;
 
-            if (phaseIn >= 0 && phaseIn <= 90) begin
+            if (phaseIn >= 0 && phaseIn <= 90)
                 // Map [0º, 90º] to [0, maxVal]
-                phase_to_phaseVal = $floor(phaseIn * maxVal / 90);
-            end
-            else if (phaseIn > 90 && phaseIn <= 180) begin
+                phase_to_phaseVal = (phaseIn * maxVal) / 90;
+            else if (phaseIn > 90 && phaseIn <= 180)
                 // Map [90º, 180º] to [minVal, -TABLE_SIZE]
-                phase_to_phaseVal = minVal + $floor((phaseIn - 90) * maxVal / 90);
-            end
-            else if (phaseIn >= -180 && phaseIn < 0) begin
+                phase_to_phaseVal = minVal + ((phaseIn - 90) * maxVal) / 90;
+            else if (phaseIn >= -180 && phaseIn < 0)
                 // Map [-180º, 0º] to [TABLE_SIZE, 0]
-                phase_to_phaseVal = -TABLE_SIZE + $floor((phaseIn + 180) * TABLE_SIZE / 180);
-            end
-            else begin
+                phase_to_phaseVal = -TABLE_SIZE + ((phaseIn + 180) * TABLE_SIZE) / 180;
+            else
                 // Clamp phase to valid range [-180º, 180º]
                 phase_to_phaseVal = (phaseIn > 180) ? maxVal : minVal;
-            end
         end
     endfunction
 
-    always_ff @(posedge clock or posedge reset) begin
+    always @(posedge clock or posedge reset) begin
         if (reset || phase != prev_phase) begin
-            tableSize <= logic_table_size;   // Assign constant table size on reset
-            prev_phase <= phase;             // Update previous phase
+            tableSize = logic_table_size;   // Assign constant table size on reset
+            prev_phase = phase;             // Update previous phase
 
             // Convert input phase into table index
             phaseIdx = phase_to_phaseVal(phase);
@@ -135,8 +131,8 @@ module sine_wave #(
             end
 
             sine <= sine_wave_table[i];      // Initial output
-
-        end else begin
+        end
+        else begin
             // Output current sine wave sample
             sine <= sine_wave_table[i];
 
@@ -145,20 +141,19 @@ module sine_wave #(
                 if (i >= tableSize - phaseStep) begin
                     reverseTraversal <= 1;   // Switch to reverse traversal at the end
                 end
-
                 if (i + phaseStep <= tableSize) begin
                     i <= i + phaseStep;      // Only increment if within bounds
                 end
-
-            end else begin                   // Reverse traversal
+            end
+            else begin                   // Reverse traversal
                 if (i <= phaseStep) begin
                     reverseTraversal <= 0;   // Switch to forward traversal at the start
                 end
-
                 if (i - phaseStep >= 0) begin
-                    i <= (i - phaseStep);    // Only decrement if within bounds
+                    i <= i - phaseStep;    // Only decrement if within bounds
                 end
             end
         end
     end
+
 endmodule
