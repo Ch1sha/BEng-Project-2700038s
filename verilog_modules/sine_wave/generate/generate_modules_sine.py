@@ -74,7 +74,11 @@ def construct_sine_table_module(sine_table: np.ndarray, bitResolution: int, file
         file.write('        table_size = TABLE_SIZE-1;\n')
         for i, value in enumerate(sine_table):
             file.write('        sine_wave[{}] = {};\n'.format(i, value))
-        file.write('    end\n')
+        file.write('    end\n\n')
+        file.write('    // Immediately output the sine value corresponding to the input address')
+        file.write('    always @(*) begin\n')
+        file.write('        data = sine_wave[addr];\n')
+        file.write('    end\n\n')
         file.write('endmodule\n')
 
 def optimise_sampleCount(bitCount, min_sample_val=None, max_sample_val=None, random_state=42, n_calls=100, n_initial_points=100):
