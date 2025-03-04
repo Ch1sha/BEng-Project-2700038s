@@ -1,0 +1,73 @@
+################################################################################
+## Combined Constraints File for signal_gen_top on the RFSoC 4x2 
+## (Using free GPIO – not LED or switch pins)
+################################################################################
+
+##---------------------------------------------------------------------
+## Clock and Reset (using PMOD0 pins)
+##---------------------------------------------------------------------
+# Use PMOD0_0 (PACKAGE_PIN AF16) for the system clock and PMOD0_1 (PACKAGE_PIN AG17) for reset.
+set_property PACKAGE_PIN AF16 [get_ports {clock}]
+set_property IOSTANDARD LVCMOS18 [get_ports {clock}]
+create_clock -name sys_clk -period 10.0 [get_ports {clock}]
+
+set_property PACKAGE_PIN AG17 [get_ports {reset}]
+set_property IOSTANDARD LVCMOS18 [get_ports {reset}]
+
+##---------------------------------------------------------------------
+## Phase Bus (9-bit) -> Use PMOD0 (bits 2–7) and PMOD1 (bits 0–2)
+##---------------------------------------------------------------------
+# From the 4x2_PMOD.xdc, PMOD0 pins are defined as:
+#   PMOD0_2: AJ16, PMOD0_3: AK17, PMOD0_4: AF15, PMOD0_5: AF17,
+#   PMOD0_6: AH17, PMOD0_7: AK16.
+# And PMOD1 pins:
+#   PMOD1_0: AW13, PMOD1_1: AR13, PMOD1_2: AU13.
+set phase_pins [list AJ16 AK17 AF15 AF17 AH17 AK16 AW13 AR13 AU13]
+for {set i 0} {$i < [llength $phase_pins]} {incr i} {
+    set_property PACKAGE_PIN [lindex $phase_pins $i] [get_ports "phase[$i]"]
+    set_property IOSTANDARD LVCMOS18 [get_ports "phase[$i]"]
+}
+
+##---------------------------------------------------------------------
+## Phase Step Bus (9-bit) -> Use PMOD1 (bits 3–7) and PMOD01 (bits 0–3)
+##---------------------------------------------------------------------
+# From the 4x2_PMOD.xdc, PMOD1 pins:
+#   PMOD1_3: AV13, PMOD1_4: AU15, PMOD1_5: AP14, PMOD1_6: AT15, PMOD1_7: AU14.
+# From the 4x2_PMOD.xdc, PMOD01 pins:
+#   PMOD01_0: AW16, PMOD01_1: AW15, PMOD01_2: AW14, PMOD01_3: AR16.
+set phaseStep_pins [list AV13 AU15 AP14 AT15 AU14 AW16 AW15 AW14 AR16]
+for {set i 0} {$i < [llength $phaseStep_pins]} {incr i} {
+    set_property PACKAGE_PIN [lindex $phaseStep_pins $i] [get_ports "phaseStep[$i]"]
+    set_property IOSTANDARD LVCMOS18 [get_ports "phaseStep[$i]"]
+}
+
+##---------------------------------------------------------------------
+## Sine Output Bus (12-bit) -> Use SYZYGY single-ended S pins
+##---------------------------------------------------------------------
+# From the 4x2_SYZYGY.xdc, the following assignments exist:
+#   SYZYGY_S16 -> B8, SYZYGY_S18 -> D6, SYZYGY_S20 -> C6, SYZYGY_S22 -> B5,
+#   SYZYGY_S24 -> A5, SYZYGY_S26 -> C5, SYZYGY_S17 -> AR6, SYZYGY_S19 -> AR7,
+#   SYZYGY_S21 -> AU7, SYZYGY_S23 -> AV7, SYZYGY_S25 -> AU8, SYZYGY_S27 -> AV8.
+# We will repurpose these for the sine output bus.
+set sine_pins [list B8 D6 C6 B5 A5 C5 AR6 AR7 AU7 AV7 AU8 AV8]
+for {set i 0} {$i < [llength $sine_pins]} {incr i} {
+    set_property PACKAGE_PIN [lindex $sine_pins $i] [get_ports "sine[$i]"]
+    set_property IOSTANDARD LVCMOS18 [get_ports "sine[$i]"]
+}
+
+##---------------------------------------------------------------------
+## Phase Index Output Bus (9-bit) -> Use free MIO pins
+##---------------------------------------------------------------------
+# Choose nine MIO pins that are not used by the Processing System.
+set phaseIdxOut_pins [list MIO78 MIO79 MIO80 MIO81 MIO82 MIO83 MIO84 MIO85 MIO86]
+for {set i 0} {$i < [llength $phaseIdxOut_pins]} {incr i} {
+    set_property PACKAGE_PIN [lindex $phaseIdxOut_pins $i] [get_ports "phaseIdxOut[$i]"]
+    set_property IOSTANDARD LVCMOS18 [get_ports "phaseIdxOut[$i]"]
+}
+
+##---------------------------------------------------------------------
+## Bitstream Options
+##---------------------------------------------------------------------
+set_property BITSTREAM.CONFIG.UNUSEDPIN PULLUP [current_design]
+set_property BITSTREAM.CONFIG.OVERTEMPSHUTDOWN ENABLE [current_design]
+set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
