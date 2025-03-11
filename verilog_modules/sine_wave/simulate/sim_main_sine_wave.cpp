@@ -62,10 +62,12 @@ int main(int argc, char** argv) {
         if (cycleCount == 150){
             //top->phase = -90;
             //top->phaseStep = 3;
+            //top->reset = 1;
         }
         if (cycleCount == 300){
-            //top->phase = 0;
+            top->phase = 90;
             //top->phaseStep = 10;
+            //top->reset = 0;
         }
 
         // Evaluate model on both edges

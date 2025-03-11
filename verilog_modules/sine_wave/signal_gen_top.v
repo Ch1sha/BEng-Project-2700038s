@@ -13,14 +13,17 @@ module signal_gen_top#(
     parameter TABLE_REG_SIZE = 9,
     parameter PHASE_SIZE = 8 // resolution for phase input (from -180º to 180º)
 ) (
-    input  wire                        clock,         // System clock input
-    input  wire                        reset,         // Active-high reset signal
-    input  wire signed [PHASE_SIZE:0]  phase,         // Phase input (-180º to 180º, resolution defined by PHASE_SIZE)
-    input  wire signed [PHASE_SIZE:0]  phaseStep,     // Phase step input to control phase increment
-    output wire [SINE_SIZE-1:0]        sine,          // 12-bit sine wave output
-    output wire signed [PHASE_SIZE:0]  phaseIdxOut,    // Phase index output from sine_wave module
-    output reg  signed [TABLE_REG_SIZE:0]        i
+    input  wire                             clock,         // System clock input
+    input  wire                             reset,         // Active-high reset signal, will act as active low enable signal
+    input  wire signed [PHASE_SIZE:0]       phase,         // Phase input (-180º to 180º, resolution defined by PHASE_SIZE)
+    input  wire signed [PHASE_SIZE:0]       phaseStep,     // Phase step input to control phase increment
+    output reg [SINE_SIZE-1:0]              sine,          // 12-bit sine wave output
+    output reg signed [PHASE_SIZE:0]        phaseIdxOut,   // Phase index output from sine_wave module
+    output reg signed [TABLE_REG_SIZE:0]    i              // Index output from sine_wave module for debugging
 );
+
+    // Internal signal to connect to the sine wave output
+    wire [SINE_SIZE-1:0] sine_val;
 
     // Instantiate the sine_wave module.
     sine_wave #(
@@ -33,9 +36,19 @@ module signal_gen_top#(
         .reset(reset),
         .phase(phase),
         .phaseStep(phaseStep),
-        .sine(sine),
+        .sine(sine_val),
         .phaseIdxOut(phaseIdxOut),
-        .i(i)  // The 'i' output is unconnected in the top-level module
+        .i(i)
     );
+
+    // The reset signal will also act as the enable signal for the sine wave output
+    // Active high for the reset, active low for the enable
+    always @(posedge clock or posedge reset) begin
+        if (reset) begin
+            sine <= 0;
+        end else begin
+            sine <= sine_val;
+        end
+    end
 
 endmodule
