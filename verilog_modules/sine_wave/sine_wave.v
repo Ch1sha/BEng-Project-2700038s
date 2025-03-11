@@ -16,13 +16,13 @@ module sine_wave #(
     parameter TABLE_REG_SIZE = 9,
     parameter PHASE_SIZE = 8 // resolution for phase input (from -180º to 180º)
 ) (
-    input  wire                       clock, 
-    input  wire                       reset,
-    input  wire signed [PHASE_SIZE:0] phase,     // Phase input determines the starting point of the sine wave
-    input  wire signed [PHASE_SIZE:0] phaseStep,   // Phase step input to control the phase increment
-    output reg  [SINE_SIZE-1:0]       sine,      // n-bit sine wave output
-    output reg  signed [PHASE_SIZE:0] phaseIdxOut,
-    output reg  signed [TABLE_REG_SIZE:0]        i
+    input  wire                             clock,         // System clock input
+    input  wire                             reset,         // Active-high reset signal, will act as active low enable signal
+    input  wire signed [PHASE_SIZE:0]       phase,         // Phase input (-180º to 180º, resolution defined by PHASE_SIZE)
+    input  wire signed [PHASE_SIZE:0]       phaseStep,     // Phase step input to control phase increment
+    output reg [SINE_SIZE-1:0]              sine,          // 12-bit sine wave output
+    output reg signed [PHASE_SIZE:0]        phaseIdxOut,   // Phase index output from sine_wave module
+    output reg signed [TABLE_REG_SIZE:0]    i              // Index output from sine_wave module for debugging
 );
 
     // Wires to connect to the half-sine table ROM
