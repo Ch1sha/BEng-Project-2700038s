@@ -6,6 +6,9 @@
 //              size and resolution. The module supports phase input and phase
 //              step input to control the phase increment.
 //////////////////////////////////////////////////////////////////////////////////
+/* verilator lint_off WIDTHEXPAND */
+/* verilator lint_off BLKSEQ */
+/* verilator lint_off WIDTHTRUNC */
 
 module sine_wave #(
     parameter SINE_SIZE = 12,
@@ -19,7 +22,7 @@ module sine_wave #(
     input  wire signed [PHASE_SIZE:0] phaseStep,   // Phase step input to control the phase increment
     output reg  [SINE_SIZE-1:0]       sine,      // n-bit sine wave output
     output reg  signed [PHASE_SIZE:0] phaseIdxOut,
-    output integer                    i
+    output reg  signed [TABLE_REG_SIZE:0]        i
 );
 
     // Wires to connect to the half-sine table ROM
@@ -33,7 +36,7 @@ module sine_wave #(
         .TABLE_SIZE(TABLE_SIZE),
         .TABLE_REG_SIZE(TABLE_REG_SIZE)
     ) sine_table_inst (
-        .addr(i[TABLE_REG_SIZE-1:0]),
+        .addr(i),
         .data(sine_val),
         .table_size(table_size_wire)
     );
