@@ -18,7 +18,8 @@ module signal_gen_top#(
     input  wire signed [PHASE_SIZE:0]  phase,         // Phase input (-180º to 180º, resolution defined by PHASE_SIZE)
     input  wire signed [PHASE_SIZE:0]  phaseStep,     // Phase step input to control phase increment
     output wire [SINE_SIZE-1:0]        sine,          // 12-bit sine wave output
-    output wire signed [PHASE_SIZE:0]  phaseIdxOut    // Phase index output from sine_wave module
+    output wire signed [PHASE_SIZE:0]  phaseIdxOut,    // Phase index output from sine_wave module
+    output reg  signed [TABLE_REG_SIZE:0]        i
 );
 
     // Instantiate the sine_wave module.
@@ -34,7 +35,7 @@ module signal_gen_top#(
         .phaseStep(phaseStep),
         .sine(sine),
         .phaseIdxOut(phaseIdxOut),
-        .i()  // The 'i' output is unconnected in the top-level module
+        .i(i)  // The 'i' output is unconnected in the top-level module
     );
 
 endmodule

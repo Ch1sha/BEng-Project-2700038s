@@ -1,4 +1,4 @@
-#include "Vsine_wave.h"
+#include "Vsignal_gen_top.h"
 #include "verilated.h"
 #include <iostream>
 
@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
     }
 
     // Instantiate the model
-    Vsine_wave* top = new Vsine_wave{contextp};
+    Vsignal_gen_top* top = new Vsignal_gen_top{contextp};
 
     // Set initial input values
     top->clock = 0;

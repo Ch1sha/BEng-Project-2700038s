@@ -5,7 +5,7 @@ set -e
 MODULE_DIR=$(dirname "$0")/..
 
 simulation_filename="sim_main_sine_wave"
-verilog_module_filename="sine_wave"
+verilog_module_filename="signal_gen_top"
 
 # compile the simulation of the sine_wave module
 verilator --cc --exe --build -j 0 -Wall -I${MODULE_DIR} ${MODULE_DIR}/simulate/${simulation_filename}.cpp ${MODULE_DIR}/${verilog_module_filename}.v

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import os
 
 # Read the CSV file
-csv_file = os.path.join(os.path.dirname(__file__),'sine_wave_output.csv')
+csv_file = os.path.join(os.path.dirname(__file__),'signal_gen_top_output.csv')
 
 data = pd.read_csv(csv_file) 
 
