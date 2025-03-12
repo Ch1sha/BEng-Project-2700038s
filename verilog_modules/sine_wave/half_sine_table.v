@@ -15,14 +15,12 @@ module half_sine_table #(
 ) (
     input  wire [TABLE_REG_SIZE-1:0] addr,       // Address to access the sine value
     output reg  [SINE_SIZE-1:0]      data,       // Sine value at the given address
-    output wire [TABLE_REG_SIZE-1:0] table_size  // Maximum valid address (TABLE_SIZE - 1)
+    output reg [TABLE_REG_SIZE:0] table_size  // Maximum valid address (TABLE_SIZE - 1)
 );
 
     // Internal memory array for the half sine wave lookup table
     reg [SINE_SIZE-1:0] sine_wave [0:TABLE_SIZE-1];
 
-    // Constant assignment for table_size
-    assign table_size = TABLE_SIZE - 1;
     // Initialise the lookup table with the sine values
     initial begin
         table_size = TABLE_SIZE-1;

@@ -89,7 +89,7 @@ module sine_wave #(
     always @(posedge clock or posedge reset) begin
         if (reset || phase != prev_phase) begin
             tableSize = table_size_wire;   // Obtain the constant table size from the ROM (TABLE_SIZE - 1)
-            prev_phase = phase;            // Update previous phase
+            prev_phase <= phase;           // Update previous phase (synchronous to avoid combinational loops)
             // Convert input phase into a table index
             phaseIdx = phase_to_phaseVal(phase);
             phaseIdxOut <= phaseIdx;
