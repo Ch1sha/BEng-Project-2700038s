@@ -4,6 +4,8 @@
 	module wave_gen #
 	(
 		// Users to add parameters here
+		parameter SINE_SIZE = 12,
+		parameter PHASE_SIZE = 8,
 
 		// User parameters ends
 		// Do not modify the parameters beyond this line
@@ -59,7 +61,9 @@
 		.S_AXIS_TDATA(phase_in_tdata),
 		.S_AXIS_TSTRB(phase_in_tstrb),
 		.S_AXIS_TLAST(phase_in_tlast),
-		.S_AXIS_TVALID(phase_in_tvalid)
+		.S_AXIS_TVALID(phase_in_tvalid),
+		.phase(phase_from_slave),
+		.phaseStep(phaseStep_from_slave)
 	);
 
 // Instantiation of Axi Bus Interface sine_out
@@ -84,11 +88,18 @@
 	);
 
 	// Add user logic here
+	// phase is the first PHASE_SIZE bits of S_AXIS_TDATA
+	// phaseStep is the next PHASE_SIZE bits of S_AXIS_TDATA
+	wire signed [PHASE_SIZE:0] phase_from_slave;
+	wire signed [PHASE_SIZE:0] phaseStep_from_slave;
+	wire [SINE_SIZE-1:0] sine_val;
+
+	// Signal generator module
 	signal_gen_top signal_gen_top_inst(
         .clock(phase_in_aclk),
         .reset(phase_in_aresetn),
-        .phase(phase),
-        .phaseStep(phaseStep),
+        .phase(phase_from_slave),
+        .phaseStep(phaseStep_from_slave),
         .sine(sine_val)
 	);
 

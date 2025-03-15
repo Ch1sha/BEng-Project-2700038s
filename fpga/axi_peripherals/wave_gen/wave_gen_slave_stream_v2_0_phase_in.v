@@ -9,10 +9,17 @@
 		// Do not modify the parameters beyond this line
 
 		// AXI4Stream sink: Data Width
-		parameter integer C_S_AXIS_TDATA_WIDTH	= 32
+		parameter integer C_S_AXIS_TDATA_WIDTH	= 32,
+		parameter PHASE_SIZE = 8
 	)
 	(
 		// Users to add ports here
+
+		// phase and phaseStep are slices of S_AXIS_TDATA
+		// phase is the first PHASE_SIZE bits of S_AXIS_TDATA
+		// phaseStep is the next PHASE_SIZE bits of S_AXIS_TDATA
+		output reg signed [PHASE_SIZE:0] phase,
+		output reg signed [PHASE_SIZE:0] phaseStep,
 
 		// User ports ends
 		// Do not modify the ports beyond this line
@@ -161,6 +168,15 @@
 	endgenerate
 
 	// Add user logic here
+	always @(posedge S_AXIS_ACLK) begin
+        if (!S_AXIS_ARESETN) begin
+            phase <= 0;
+            phaseStep <= 0;
+        end else if (fifo_wren) begin
+            phase <= S_AXIS_TDATA[PHASE_SIZE:0];
+            phaseStep <= S_AXIS_TDATA[2*PHASE_SIZE+1:PHASE_SIZE+1];
+        end
+    end
 
 	// User logic ends
 
