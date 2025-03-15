@@ -82,7 +82,8 @@ module wave_gen #(
 		.M_AXIS_TDATA(sine_out_tdata),
 		.M_AXIS_TSTRB(sine_out_tstrb),
 		.M_AXIS_TLAST(sine_out_tlast),
-		.M_AXIS_TREADY(sine_out_tready)
+		.M_AXIS_TREADY(sine_out_tready),
+		.sine_in(sine_val)
 	);
 
 	// Add user logic here

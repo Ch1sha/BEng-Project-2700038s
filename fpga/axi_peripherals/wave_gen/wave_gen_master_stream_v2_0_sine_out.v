@@ -2,6 +2,7 @@
 
 module wave_gen_master_stream_v2_0_sine_out #(
 	// Users to add parameters here
+	parameter SINE_SIZE = 12,
 
 	// User parameters ends
 	// Do not modify the parameters beyond this line
@@ -13,6 +14,8 @@ module wave_gen_master_stream_v2_0_sine_out #(
 )
 (
 	// Users to add ports here
+
+	input  wire [SINE_SIZE-1:0] sine_in,
 
 	// User ports ends
 	// Do not modify the ports beyond this line
@@ -174,7 +177,8 @@ module wave_gen_master_stream_v2_0_sine_out #(
 		if (!M_AXIS_ARESETN) begin
 			stream_data_out <= 1;                      
 		end else if (tx_en) begin
-			stream_data_out <= read_pointer + 32'b1;   
+			// the first SINE_SIZE bits of S_AXIS_TDATA will be the sine wave data
+			stream_data_out <= {sine_in, {(C_M_AXIS_TDATA_WIDTH-SINE_SIZE){1'b0}} };
 		end
 	end
 
