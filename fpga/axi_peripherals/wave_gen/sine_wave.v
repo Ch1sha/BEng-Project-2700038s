@@ -20,14 +20,15 @@ module sine_wave #(
     input  wire                             reset,         // Active-high reset signal, will act as active low enable signal
     input  wire signed [PHASE_SIZE:0]       phase,         // Phase input (-180º to 180º, resolution defined by PHASE_SIZE)
     input  wire signed [PHASE_SIZE:0]       phaseStep,     // Phase step input to control phase increment
-    output reg [SINE_SIZE-1:0]              sine,          // 12-bit sine wave output
-    output reg signed [PHASE_SIZE:0]        phaseIdxOut,   // Phase index output from sine_wave module
-    output reg signed [TABLE_REG_SIZE:0]    i              // Index output from sine_wave module for debugging
+    output reg [SINE_SIZE-1:0]              sine           // 12-bit sine wave output
 );
 
     // Wires to connect to the half-sine table ROM
     wire [SINE_SIZE-1:0] sine_val;
     wire [TABLE_REG_SIZE-1:0] table_size_wire;
+
+    // Instantiate the half-sine table module as a ROM.
+    reg signed [TABLE_REG_SIZE:0] i;
 
     // Instantiate the half-sine table module as a ROM.
     // The address input is derived from the lower bits of i.
@@ -92,7 +93,6 @@ module sine_wave #(
             prev_phase <= phase;           // Update previous phase (synchronous to avoid combinational loops)
             // Convert input phase into a table index
             phaseIdx = phase_to_phaseVal(phase);
-            phaseIdxOut <= phaseIdx;
             // Set initial index based on phase offset
             i <= calculate_start_index(phaseIdx);
 

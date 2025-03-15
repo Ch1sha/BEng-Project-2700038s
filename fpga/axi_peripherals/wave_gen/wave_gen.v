@@ -42,6 +42,14 @@
 		input wire  sine_out_tready
 	);
 // Instantiation of Axi Bus Interface phase_in
+	// ACLK     (input) is the clock input.
+	// ARESETN  (input) is the active low reset signal.
+	// TREADY  (output) is the flow control signal that is used to indicate that the slave is ready to accept data in.
+	// TDATA    (input) is the payload that is used to provide the data that is passing into the interface.
+	// TSTRB    (input) is the byte strobe signal that is used to indicate which byte lanes are valid.
+	// TLAST    (input) is the signal that is used to indicate the end of a packet.
+	// TVALID   (input) is the flow control signal that is used to indicate that the data on the TDATA bus is valid.
+
 	wave_gen_slave_stream_v2_0_phase_in # ( 
 		.C_S_AXIS_TDATA_WIDTH(C_phase_in_TDATA_WIDTH)
 	) wave_gen_slave_stream_v2_0_phase_in_inst (
@@ -55,6 +63,13 @@
 	);
 
 // Instantiation of Axi Bus Interface sine_out
+	// ACLK    (input) is the clock input.
+	// ARESETN (input) is the active low reset signal.
+	// TVALID (output) is the flow control signal that is used to indicate that the data on the TDATA bus is valid.
+	// TDATA  (output) is the payload that is used to provide the data that is passing across the interface.
+	// TSTRB  (output) is the byte strobe signal that is used to indicate which byte lanes are valid.
+	// TLAST  (output) is the signal that is used to indicate the end of a packet.
+	// TREADY  (input) is the flow control signal that is used to indicate that the master is ready to send data.
 	wave_gen_master_stream_v2_0_sine_out # ( 
 		.C_M_AXIS_TDATA_WIDTH(C_sine_out_TDATA_WIDTH),
 		.C_M_START_COUNT(C_sine_out_START_COUNT)
@@ -69,6 +84,13 @@
 	);
 
 	// Add user logic here
+	signal_gen_top signal_gen_top_inst(
+        .clock(phase_in_aclk),
+        .reset(phase_in_aresetn),
+        .phase(phase),
+        .phaseStep(phaseStep),
+        .sine(sine_val)
+	);
 
 	// User logic ends
 

@@ -17,9 +17,7 @@ module signal_gen_top#(
     input  wire                             reset,         // Active-high reset signal, will act as active low enable signal
     input  wire signed [PHASE_SIZE:0]       phase,         // Phase input (-180º to 180º, resolution defined by PHASE_SIZE)
     input  wire signed [PHASE_SIZE:0]       phaseStep,     // Phase step input to control phase increment
-    output reg [SINE_SIZE-1:0]              sine,          // 12-bit sine wave output
-    output reg signed [PHASE_SIZE:0]        phaseIdxOut,   // Phase index output from sine_wave module
-    output reg signed [TABLE_REG_SIZE:0]    i              // Index output from sine_wave module for debugging
+    output reg [SINE_SIZE-1:0]              sine         // 12-bit sine wave output
 );
 
     // Internal signal to connect to the sine wave output
@@ -36,9 +34,7 @@ module signal_gen_top#(
         .reset(reset),
         .phase(phase),
         .phaseStep(phaseStep),
-        .sine(sine_val),
-        .phaseIdxOut(phaseIdxOut),
-        .i(i)
+        .sine(sine_val)
     );
 
     // The reset signal will also act as the enable signal for the sine wave output
