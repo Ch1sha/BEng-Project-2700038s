@@ -1,49 +1,46 @@
-
 `timescale 1 ns / 1 ps
 
-	module wave_gen #
-	(
-		// Users to add parameters here
-		parameter SINE_SIZE = 12,
-		parameter PHASE_SIZE = 8,
+module wave_gen #(
+	// Users to add parameters here
+	parameter SINE_SIZE = 12,
+	parameter PHASE_SIZE = 8,
 
-		// User parameters ends
-		// Do not modify the parameters beyond this line
+	// User parameters ends
+	// Do not modify the parameters beyond this line
 
+	// Parameters of Axi Slave Bus Interface phase_in
+	parameter integer C_phase_in_TDATA_WIDTH = 32,
 
-		// Parameters of Axi Slave Bus Interface phase_in
-		parameter integer C_phase_in_TDATA_WIDTH	= 32,
+	// Parameters of Axi Master Bus Interface sine_out
+	parameter integer C_sine_out_TDATA_WIDTH = 32,
+	parameter integer C_sine_out_START_COUNT = 32
+)
+(
+	// Users to add ports here
 
-		// Parameters of Axi Master Bus Interface sine_out
-		parameter integer C_sine_out_TDATA_WIDTH	= 32,
-		parameter integer C_sine_out_START_COUNT	= 32
-	)
-	(
-		// Users to add ports here
+	// User ports ends
+	// Do not modify the ports beyond this line
 
-		// User ports ends
-		// Do not modify the ports beyond this line
+	// Ports of Axi Slave Bus Interface phase_in
+	input wire phase_in_aclk,
+	input wire phase_in_aresetn,
+	output wire phase_in_tready,
+	input wire [C_phase_in_TDATA_WIDTH-1 : 0] phase_in_tdata,
+	input wire [(C_phase_in_TDATA_WIDTH/8)-1 : 0] phase_in_tstrb,
+	input wire phase_in_tlast,
+	input wire phase_in_tvalid,
 
+	// Ports of Axi Master Bus Interface sine_out
+	input wire sine_out_aclk,
+	input wire sine_out_aresetn,
+	output wire sine_out_tvalid,
+	output wire [C_sine_out_TDATA_WIDTH-1 : 0] sine_out_tdata,
+	output wire [(C_sine_out_TDATA_WIDTH/8)-1 : 0] sine_out_tstrb,
+	output wire sine_out_tlast,
+	input wire sine_out_tready
+);
 
-		// Ports of Axi Slave Bus Interface phase_in
-		input wire  phase_in_aclk,
-		input wire  phase_in_aresetn,
-		output wire  phase_in_tready,
-		input wire [C_phase_in_TDATA_WIDTH-1 : 0] phase_in_tdata,
-		input wire [(C_phase_in_TDATA_WIDTH/8)-1 : 0] phase_in_tstrb,
-		input wire  phase_in_tlast,
-		input wire  phase_in_tvalid,
-
-		// Ports of Axi Master Bus Interface sine_out
-		input wire  sine_out_aclk,
-		input wire  sine_out_aresetn,
-		output wire  sine_out_tvalid,
-		output wire [C_sine_out_TDATA_WIDTH-1 : 0] sine_out_tdata,
-		output wire [(C_sine_out_TDATA_WIDTH/8)-1 : 0] sine_out_tstrb,
-		output wire  sine_out_tlast,
-		input wire  sine_out_tready
-	);
-// Instantiation of Axi Bus Interface phase_in
+	// Instantiation of Axi Bus Interface phase_in
 	// ACLK     (input) is the clock input.
 	// ARESETN  (input) is the active low reset signal.
 	// TREADY  (output) is the flow control signal that is used to indicate that the slave is ready to accept data in.
@@ -66,7 +63,7 @@
 		.phaseStep(phaseStep_from_slave)
 	);
 
-// Instantiation of Axi Bus Interface sine_out
+	// Instantiation of Axi Bus Interface sine_out
 	// ACLK    (input) is the clock input.
 	// ARESETN (input) is the active low reset signal.
 	// TVALID (output) is the flow control signal that is used to indicate that the data on the TDATA bus is valid.
@@ -74,6 +71,7 @@
 	// TSTRB  (output) is the byte strobe signal that is used to indicate which byte lanes are valid.
 	// TLAST  (output) is the signal that is used to indicate the end of a packet.
 	// TREADY  (input) is the flow control signal that is used to indicate that the master is ready to send data.
+
 	wave_gen_master_stream_v2_0_sine_out # ( 
 		.C_M_AXIS_TDATA_WIDTH(C_sine_out_TDATA_WIDTH),
 		.C_M_START_COUNT(C_sine_out_START_COUNT)
@@ -96,13 +94,13 @@
 
 	// Signal generator module
 	signal_gen_top signal_gen_top_inst(
-        .clock(phase_in_aclk),
-        .reset(phase_in_aresetn),
-        .phase(phase_from_slave),
-        .phaseStep(phaseStep_from_slave),
-        .sine(sine_val)
+		.clock(phase_in_aclk),
+		.reset(phase_in_aresetn),
+		.phase(phase_from_slave),
+		.phaseStep(phaseStep_from_slave),
+		.sine(sine_val)
 	);
 
 	// User logic ends
 
-	endmodule
+endmodule
