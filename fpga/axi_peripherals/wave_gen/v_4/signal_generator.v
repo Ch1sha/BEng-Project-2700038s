@@ -103,6 +103,8 @@ module signal_generator #
 	//-------------------------------------------------------------------------
     // Inline Sine Generation Logic (Flattened signal_gen_top, sine_wave, and half_sine_table)
     //-------------------------------------------------------------------------
+    reg [SINE_SIZE-1:0] sine_reg;
+    assign sine_val_to_master = sine_reg;
     // Internal registers and variables for computation
     reg  signed [TABLE_REG_SIZE:0] i;
     reg  signed [PHASE_SIZE:0]     prev_phase;
@@ -118,7 +120,6 @@ module signal_generator #
     reg [TABLE_REG_SIZE:0] table_size_wire;
 
     // Initialise the lookup table
-    integer idx;
     initial begin
         table_size_wire = TABLE_SIZE - 1;
         sine_table_rom[0]   = 0;
@@ -435,71 +436,47 @@ module signal_generator #
     endfunction
 
     // Syncronous logic to update the sine value based on the phase input
-    always @(posedge clock or posedge reset) begin
-        if (reset || phase != prev_phase) begin
-            tableSize = table_size_wire;   // Obtain the constant table size from the ROM (TABLE_SIZE - 1)
-            prev_phase <= phase;           // Update previous phase (synchronous to avoid combinational loops)
-            // Convert input phase into a table index
-            phaseIdx = phase_to_phaseVal(phase);
-            // Set initial index based on phase offset
-            i <= calculate_start_index(phaseIdx);
-
-            // Set initial traversal direction based on phase value
-            if (phase >= 0) begin
-                case (phase)
-                    90: begin
-                        // At 90º, reverse traversal
-                        reverseTraversal <= 1;
-                    end
-                    180: begin
-                        // At 180º, reverse traversal
-                        reverseTraversal <= 1;
-                    end
-                    default: begin
-                        // General case: forward traversal
-                        reverseTraversal <= (i < TABLE_SIZE - 1) ? 0 : 1;
-                    end
+    always @(posedge phase_in_aclk or posedge phase_in_aresetn) begin
+        if (phase_in_aresetn) begin
+            sine_reg        <= 0;
+            prev_phase      <= 0;
+            i               <= calculate_start_index(0);
+            reverseTraversal<= 0;
+        end else if (phase_from_slave != prev_phase) begin
+            tableSize  = table_size_wire;
+            prev_phase <= phase_from_slave;
+            phaseIdx   = phase_to_phaseVal(phase_from_slave);
+            i          <= calculate_start_index(phaseIdx);
+            if (phase_from_slave >= 0) begin
+                case (phase_from_slave)
+                    90:  reverseTraversal <= 1;
+                    180: reverseTraversal <= 1;
+                    default: reverseTraversal <= (i < TABLE_SIZE - 1) ? 0 : 1;
                 endcase
             end else begin
-                case (phase)
-                    -90: begin
-                        // At -90º, forward traversal
-                        reverseTraversal <= 0;
-                    end
-                    -180: begin
-                        // At -180º, reverse traversal
-                        reverseTraversal <= 1;
-                    end
-                    default: begin
-                        // General case: reverse traversal
-                        reverseTraversal <= (i > 0) ? 1 : 0;
-                    end
+                case (phase_from_slave)
+                    -90:  reverseTraversal <= 0;
+                    -180: reverseTraversal <= 1;
+                    default: reverseTraversal <= (i > 0) ? 1 : 0;
                 endcase
             end
-
-            sine <= sine_val;      // Set initial output from the ROM
+            sine_reg <= sine_val;
         end else begin
-            // Update the output with the current sine value from the ROM
-            sine <= sine_val;
-
-            // Update index based on traversal direction
-            if (!reverseTraversal) begin     // Forward traversal
-                if (i >= tableSize - phaseStep) begin
-                    reverseTraversal <= 1;   // Switch to reverse traversal at the end
-                end
-                if (i + phaseStep <= tableSize) begin
-                    i <= i + phaseStep;      // Increment if within bounds
-                end
-            end else begin                   // Reverse traversal
-                if (i <= phaseStep) begin
-                    reverseTraversal <= 0;   // Switch to forward traversal at the start
-                end
-                if (i - phaseStep >= 0) begin
-                    i <= i - phaseStep;      // Decrement if within bounds
-                end
+            sine_reg <= sine_val;
+            if (!reverseTraversal) begin
+                if (i >= tableSize - phaseStep_from_slave)
+                    reverseTraversal <= 1;
+                if (i + phaseStep_from_slave <= tableSize)
+                    i <= i + phaseStep_from_slave;
+            end else begin
+                if (i <= phaseStep_from_slave)
+                    reverseTraversal <= 0;
+                if (i - phaseStep_from_slave >= 0)
+                    i <= i - phaseStep_from_slave;
             end
         end
     end
+
 
     // User logic ends
 
