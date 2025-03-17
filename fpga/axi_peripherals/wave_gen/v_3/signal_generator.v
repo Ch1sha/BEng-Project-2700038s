@@ -52,6 +52,7 @@ module signal_generator #
     // TSTRB    (input) is the byte strobe signal that is used to indicate which byte lanes are valid.
     // TLAST    (input) is the signal that is used to indicate the end of a packet.
     // TVALID   (input) is the flow control signal that is used to indicate that the data on the TDATA bus is valid.
+
     signal_generator_slave_stream_v1_0_phase_in # ( 
         .C_S_AXIS_TDATA_WIDTH(C_phase_in_TDATA_WIDTH)
     ) signal_generator_slave_stream_v1_0_phase_in_inst (
@@ -65,6 +66,14 @@ module signal_generator #
     );
 
     // Instantiation of Axi Bus Interface wave_out
+	// ACLK    (input) is the clock input.
+	// ARESETN (input) is the active low reset signal.
+	// TVALID (output) is the flow control signal that is used to indicate that the data on the TDATA bus is valid.
+	// TDATA  (output) is the payload that is used to provide the data that is passing across the interface.
+	// TSTRB  (output) is the byte strobe signal that is used to indicate which byte lanes are valid.
+	// TLAST  (output) is the signal that is used to indicate the end of a packet.
+	// TREADY  (input) is the flow control signal that is used to indicate that the master is ready to send data.
+
     signal_generator_master_stream_v1_0_wave_out # ( 
         .C_M_AXIS_TDATA_WIDTH(C_wave_out_TDATA_WIDTH),
         .C_M_START_COUNT(C_wave_out_START_COUNT)
