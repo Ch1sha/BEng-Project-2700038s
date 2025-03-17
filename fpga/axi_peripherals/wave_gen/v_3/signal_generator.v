@@ -1,0 +1,75 @@
+
+`timescale 1 ns / 1 ps
+
+module signal_generator #
+(
+    // Users to add parameters here
+
+    // User parameters ends
+    // Do not modify the parameters beyond this line
+
+
+    // Parameters of Axi Slave Bus Interface phase_in
+    parameter integer C_phase_in_TDATA_WIDTH	= 32,
+
+    // Parameters of Axi Master Bus Interface wave_out
+    parameter integer C_wave_out_TDATA_WIDTH	= 32,
+    parameter integer C_wave_out_START_COUNT	= 32
+)
+(
+    // Users to add ports here
+
+    // User ports ends
+    // Do not modify the ports beyond this line
+
+
+    // Ports of Axi Slave Bus Interface phase_in
+    input wire  phase_in_aclk,
+    input wire  phase_in_aresetn,
+    output wire  phase_in_tready,
+    input wire [C_phase_in_TDATA_WIDTH-1 : 0] phase_in_tdata,
+    input wire [(C_phase_in_TDATA_WIDTH/8)-1 : 0] phase_in_tstrb,
+    input wire  phase_in_tlast,
+    input wire  phase_in_tvalid,
+
+    // Ports of Axi Master Bus Interface wave_out
+    input wire  wave_out_aclk,
+    input wire  wave_out_aresetn,
+    output wire  wave_out_tvalid,
+    output wire [C_wave_out_TDATA_WIDTH-1 : 0] wave_out_tdata,
+    output wire [(C_wave_out_TDATA_WIDTH/8)-1 : 0] wave_out_tstrb,
+    output wire  wave_out_tlast,
+    input wire  wave_out_tready
+);
+// Instantiation of Axi Bus Interface phase_in
+signal_generator_slave_stream_v1_0_phase_in # ( 
+    .C_S_AXIS_TDATA_WIDTH(C_phase_in_TDATA_WIDTH)
+) signal_generator_slave_stream_v1_0_phase_in_inst (
+    .S_AXIS_ACLK(phase_in_aclk),
+    .S_AXIS_ARESETN(phase_in_aresetn),
+    .S_AXIS_TREADY(phase_in_tready),
+    .S_AXIS_TDATA(phase_in_tdata),
+    .S_AXIS_TSTRB(phase_in_tstrb),
+    .S_AXIS_TLAST(phase_in_tlast),
+    .S_AXIS_TVALID(phase_in_tvalid)
+);
+
+// Instantiation of Axi Bus Interface wave_out
+signal_generator_master_stream_v1_0_wave_out # ( 
+    .C_M_AXIS_TDATA_WIDTH(C_wave_out_TDATA_WIDTH),
+    .C_M_START_COUNT(C_wave_out_START_COUNT)
+) signal_generator_master_stream_v1_0_wave_out_inst (
+    .M_AXIS_ACLK(wave_out_aclk),
+    .M_AXIS_ARESETN(wave_out_aresetn),
+    .M_AXIS_TVALID(wave_out_tvalid),
+    .M_AXIS_TDATA(wave_out_tdata),
+    .M_AXIS_TSTRB(wave_out_tstrb),
+    .M_AXIS_TLAST(wave_out_tlast),
+    .M_AXIS_TREADY(wave_out_tready)
+);
+
+// Add user logic here
+
+// User logic ends
+
+endmodule
