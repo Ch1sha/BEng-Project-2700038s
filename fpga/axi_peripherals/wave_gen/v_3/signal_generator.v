@@ -89,6 +89,21 @@ module signal_generator #
 
     // Add user logic here
 
+    // phase is the first PHASE_SIZE bits of S_AXIS_TDATA
+	// phaseStep is the next PHASE_SIZE bits of S_AXIS_TDATA
+	wire signed [PHASE_SIZE:0] phase_from_slave;
+	wire signed [PHASE_SIZE:0] phaseStep_from_slave;
+	wire [SINE_SIZE-1:0] sine_val_to_master;
+
+	// Signal generator module
+	signal_gen_top signal_gen_top_inst(
+		.clock(phase_in_aclk),
+		.reset(phase_in_aresetn),
+		.phase(phase_from_slave),
+		.phaseStep(phaseStep_from_slave),
+		.sine(sine_val_to_master)
+	);
+
     // User logic ends
 
 endmodule
