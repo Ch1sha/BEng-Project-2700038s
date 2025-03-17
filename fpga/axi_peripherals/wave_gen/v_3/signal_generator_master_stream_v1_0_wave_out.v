@@ -4,6 +4,7 @@
 module signal_generator_master_stream_v1_0_wave_out #
 (
     // Users to add parameters here
+    parameter SINE_SIZE = 12,
 
     // User parameters ends
     // Do not modify the parameters beyond this line
@@ -15,6 +16,7 @@ module signal_generator_master_stream_v1_0_wave_out #
 )
 (
     // Users to add ports here
+    input  wire [SINE_SIZE-1:0] sine_m_in,
 
     // User ports ends
     // Do not modify the ports beyond this line
@@ -213,11 +215,12 @@ assign tx_en = M_AXIS_TREADY && axis_tvalid;
     begin                                            
         if(!M_AXIS_ARESETN)                            
         begin                                        
-            stream_data_out <= 1;                      
+            stream_data_out <= 1;      //Possibly change to 0                 
         end                                          
         else if (tx_en)// && M_AXIS_TSTRB[byte_index]  
         begin                                        
-            stream_data_out <= read_pointer + 32'b1;   
+            // the first SINE_SIZE bits of S_AXIS_TDATA will be the sine wave data
+			stream_data_out <= {sine_m_in, {(C_M_AXIS_TDATA_WIDTH-SINE_SIZE){1'b0}} };  
         end                                          
     end                                              
 

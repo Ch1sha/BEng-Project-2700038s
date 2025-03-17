@@ -86,7 +86,8 @@ module signal_generator #
         .M_AXIS_TDATA(wave_out_tdata),
         .M_AXIS_TSTRB(wave_out_tstrb),
         .M_AXIS_TLAST(wave_out_tlast),
-        .M_AXIS_TREADY(wave_out_tready)
+        .M_AXIS_TREADY(wave_out_tready),
+        .sine_m_in(sine_val_to_master)
     );
 
     // Add user logic here
