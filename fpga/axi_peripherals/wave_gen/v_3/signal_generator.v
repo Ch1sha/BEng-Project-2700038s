@@ -4,6 +4,8 @@
 module signal_generator #
 (
     // Users to add parameters here
+    parameter SINE_SIZE = 12,
+	parameter PHASE_SIZE = 8,
 
     // User parameters ends
     // Do not modify the parameters beyond this line
@@ -41,35 +43,43 @@ module signal_generator #
     output wire  wave_out_tlast,
     input wire  wave_out_tready
 );
-// Instantiation of Axi Bus Interface phase_in
-signal_generator_slave_stream_v1_0_phase_in # ( 
-    .C_S_AXIS_TDATA_WIDTH(C_phase_in_TDATA_WIDTH)
-) signal_generator_slave_stream_v1_0_phase_in_inst (
-    .S_AXIS_ACLK(phase_in_aclk),
-    .S_AXIS_ARESETN(phase_in_aresetn),
-    .S_AXIS_TREADY(phase_in_tready),
-    .S_AXIS_TDATA(phase_in_tdata),
-    .S_AXIS_TSTRB(phase_in_tstrb),
-    .S_AXIS_TLAST(phase_in_tlast),
-    .S_AXIS_TVALID(phase_in_tvalid)
-);
+    // Instantiation of Axi Bus Interface phase_in
+    // Instantiation of Axi Bus Interface phase_in
+    // ACLK     (input) is the clock input.
+    // ARESETN  (input) is the active low reset signal.
+    // TREADY  (output) is the flow control signal that is used to indicate that the slave is ready to accept data in.
+    // TDATA    (input) is the payload that is used to provide the data that is passing into the interface.
+    // TSTRB    (input) is the byte strobe signal that is used to indicate which byte lanes are valid.
+    // TLAST    (input) is the signal that is used to indicate the end of a packet.
+    // TVALID   (input) is the flow control signal that is used to indicate that the data on the TDATA bus is valid.
+    signal_generator_slave_stream_v1_0_phase_in # ( 
+        .C_S_AXIS_TDATA_WIDTH(C_phase_in_TDATA_WIDTH)
+    ) signal_generator_slave_stream_v1_0_phase_in_inst (
+        .S_AXIS_ACLK(phase_in_aclk),
+        .S_AXIS_ARESETN(phase_in_aresetn),
+        .S_AXIS_TREADY(phase_in_tready),
+        .S_AXIS_TDATA(phase_in_tdata),
+        .S_AXIS_TSTRB(phase_in_tstrb),
+        .S_AXIS_TLAST(phase_in_tlast),
+        .S_AXIS_TVALID(phase_in_tvalid)
+    );
 
-// Instantiation of Axi Bus Interface wave_out
-signal_generator_master_stream_v1_0_wave_out # ( 
-    .C_M_AXIS_TDATA_WIDTH(C_wave_out_TDATA_WIDTH),
-    .C_M_START_COUNT(C_wave_out_START_COUNT)
-) signal_generator_master_stream_v1_0_wave_out_inst (
-    .M_AXIS_ACLK(wave_out_aclk),
-    .M_AXIS_ARESETN(wave_out_aresetn),
-    .M_AXIS_TVALID(wave_out_tvalid),
-    .M_AXIS_TDATA(wave_out_tdata),
-    .M_AXIS_TSTRB(wave_out_tstrb),
-    .M_AXIS_TLAST(wave_out_tlast),
-    .M_AXIS_TREADY(wave_out_tready)
-);
+    // Instantiation of Axi Bus Interface wave_out
+    signal_generator_master_stream_v1_0_wave_out # ( 
+        .C_M_AXIS_TDATA_WIDTH(C_wave_out_TDATA_WIDTH),
+        .C_M_START_COUNT(C_wave_out_START_COUNT)
+    ) signal_generator_master_stream_v1_0_wave_out_inst (
+        .M_AXIS_ACLK(wave_out_aclk),
+        .M_AXIS_ARESETN(wave_out_aresetn),
+        .M_AXIS_TVALID(wave_out_tvalid),
+        .M_AXIS_TDATA(wave_out_tdata),
+        .M_AXIS_TSTRB(wave_out_tstrb),
+        .M_AXIS_TLAST(wave_out_tlast),
+        .M_AXIS_TREADY(wave_out_tready)
+    );
 
-// Add user logic here
+    // Add user logic here
 
-// User logic ends
+    // User logic ends
 
 endmodule
