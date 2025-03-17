@@ -62,7 +62,9 @@ module signal_generator #
         .S_AXIS_TDATA(phase_in_tdata),
         .S_AXIS_TSTRB(phase_in_tstrb),
         .S_AXIS_TLAST(phase_in_tlast),
-        .S_AXIS_TVALID(phase_in_tvalid)
+        .S_AXIS_TVALID(phase_in_tvalid),
+        .phase_s_out(phase_from_slave),
+        .phaseStep_s_out(phaseStep_from_slave)
     );
 
     // Instantiation of Axi Bus Interface wave_out
