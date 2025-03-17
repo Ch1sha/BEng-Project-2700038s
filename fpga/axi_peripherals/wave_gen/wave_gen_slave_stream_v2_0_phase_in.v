@@ -2,13 +2,13 @@
 
 module wave_gen_slave_stream_v2_0_phase_in #(
 	// Users to add parameters here
+	parameter PHASE_SIZE = 8,
 
 	// User parameters ends
 	// Do not modify the parameters beyond this line
 
 	// AXI4Stream sink: Data Width
-	parameter integer C_S_AXIS_TDATA_WIDTH = 32,
-	parameter PHASE_SIZE = 8
+	parameter integer C_S_AXIS_TDATA_WIDTH = 32
 )
 (
 	// Users to add ports here
