@@ -436,8 +436,8 @@ module signal_generator #
     endfunction
 
     // Syncronous logic to update the sine value based on the phase input
-    always @(posedge phase_in_aclk or posedge phase_in_aresetn) begin
-        if (!phase_in_aresetn) begin
+    always @(posedge phase_in_aclk or negedge phase_in_aresetn) begin
+        if (phase_in_aresetn==1'b0) begin
             sine_reg        <= 0;
             prev_phase      <= 0;
             i               <= calculate_start_index(0);
