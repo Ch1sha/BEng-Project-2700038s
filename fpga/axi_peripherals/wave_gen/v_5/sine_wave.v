@@ -17,7 +17,7 @@ module sine_wave #(
     parameter PHASE_SIZE = 8 // resolution for phase input (from -180º to 180º)
 ) (
     input  wire                             clock,         // System clock input
-    input  wire                             reset,         // Active-high reset signal, will act as active low enable signal
+    input  wire                             reset_n,         // Active-low reset signal, will act as active high enable signal
     input  wire signed [PHASE_SIZE:0]       phase,         // Phase input (-180º to 180º, resolution defined by PHASE_SIZE)
     input  wire signed [PHASE_SIZE:0]       phaseStep,     // Phase step input to control phase increment
     output reg [SINE_SIZE-1:0]              sine           // 12-bit sine wave output
@@ -87,8 +87,8 @@ module sine_wave #(
         end
     endfunction
 
-    always @(posedge clock or posedge reset) begin
-        if (reset || phase != prev_phase) begin
+    always @(posedge clock) begin
+        if (!reset_n || phase != prev_phase) begin
             tableSize = table_size_wire;   // Obtain the constant table size from the ROM (TABLE_SIZE - 1)
             prev_phase <= phase;           // Update previous phase (synchronous to avoid combinational loops)
             // Convert input phase into a table index

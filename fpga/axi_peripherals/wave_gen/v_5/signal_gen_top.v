@@ -14,7 +14,7 @@ module signal_gen_top#(
     parameter PHASE_SIZE = 8 // resolution for phase input (from -180º to 180º)
 ) (
     input  wire                             clock,         // System clock input
-    input  wire                             reset,         // Active-high reset signal, will act as active low enable signal
+    input  wire                             reset_n,         // Active-high reset signal, will act as active low enable signal
     input  wire signed [PHASE_SIZE:0]       phase,         // Phase input (-180º to 180º, resolution defined by PHASE_SIZE)
     input  wire signed [PHASE_SIZE:0]       phaseStep,     // Phase step input to control phase increment
     output reg [SINE_SIZE-1:0]              sine         // 12-bit sine wave output
@@ -31,16 +31,16 @@ module signal_gen_top#(
         .PHASE_SIZE(PHASE_SIZE)
     ) sine_wave_inst (
         .clock(clock),
-        .reset(reset),
+        .reset_n(reset_n),
         .phase(phase),
         .phaseStep(phaseStep),
         .sine(sine_val)
     );
 
     // The reset signal will also act as the enable signal for the sine wave output
-    // Active high for the reset, active low for the enable
-    always @(posedge clock or posedge reset) begin
-        if (reset) begin
+    // Active low for the reset, active high for the enable
+    always @(posedge clock) begin
+        if (!reset_n) begin
             sine <= 0;
         end else begin
             sine <= sine_val;
